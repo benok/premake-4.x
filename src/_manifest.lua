@@ -63,6 +63,11 @@
 		"actions/vstudio/vs2005_csproj_user.lua",
 		"actions/vstudio/vs2010_vcxproj.lua",
 		
+		-- RAD Studio actions
+		"actions/radstudio/_radstudio.lua",
+		"actions/radstudio/rs2010_groupproj.lua",
+		"actions/radstudio/rs2010x_cbproj.lua",
+
 		-- Xcode action
 		"actions/xcode/_xcode.lua",
 		"actions/xcode/xcode_common.lua",

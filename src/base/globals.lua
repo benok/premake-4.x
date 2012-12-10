@@ -14,6 +14,10 @@
 
 	premake.platforms = 
 	{
+		Generic = 
+		{ 
+			cfgsuffix       = "generic",
+		},
 		Native = 
 		{ 
 			cfgsuffix       = "",

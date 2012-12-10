@@ -31,6 +31,7 @@
 
 		sln.name           = name
 		sln.basedir        = os.getcwd()			
+		sln.uuid           = os.uuid()
 		sln.projects       = { }
 		sln.blocks         = { }
 		sln.configurations = { }

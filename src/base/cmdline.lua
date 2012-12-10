@@ -66,6 +66,7 @@
 		value       = "VALUE",
 		description = "Add target architecture (if supported by action)",
 		allowed = {
+			{ "generic",     "generic platform(applied for all platform. supported by RADStudio only)" },
 			{ "x32",         "32-bit" },
 			{ "x64",         "64-bit" },
 			{ "universal",   "Mac OS X Universal, 32- and 64-bit" },
