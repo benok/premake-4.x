@@ -209,6 +209,9 @@
 		local dir = iif(p:startswith("/"), "/", "")
 		for part in p:gmatch("[^/]+") do
 			dir = dir .. part
+			if part == "." then
+				return true
+			end
 			
 			if (part ~= "" and not path.isabsolute(part) and not os.isdir(dir)) then
 				local ok, err = builtin_mkdir(dir)
