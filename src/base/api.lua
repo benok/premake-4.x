@@ -30,6 +30,12 @@
 			}
 		},
 		
+		bcc_disable_warnings =
+		{
+			kind  = "list",
+			scope = "config",
+		},
+		
 		buildoptions =
 		{
 			kind  = "list",

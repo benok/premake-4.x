@@ -145,9 +145,33 @@
 		end
 	end
 
-	function rs2010x.bcc_options(cfg)
---		cfg.flags.Optimize
+	function bcc_options(config)
+		local cfg = config
+		if cfg == nil then
+			return
+		end
+		if cfg.flags.Symbols then
+			_p(2, '<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>')
+			_p(2, '<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>')
+		end
 		
+		if cfg.flags.Optimize or cfg.flags.OptimizeSpeed then
+			_p(2, '<BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>')
+		elseif cfg.flags.OptimizeSize then
+			_p(2, '<BCC_OptimizeForSize>true</BCC_OptimizeForSize>')
+		end
+				
+		if cfg.flags.NoPCH then
+			_p(2, '<BCC_PCHUsage>None</BCC_PCHUsage>')
+		end
+
+		if cfg.flags.NoRTTI then
+			_p(2, '<BCC_EnableRTTI>false</BCC_EnableRTTI>')
+		end
+		
+		if cfg.flags.FatalWarnings then
+			_p(2,'<BCC_WarningIsError>true</BCC_WarningIsError>')
+		end
 	end
 	
 	function rs2010x.config_block(prj, platform, radconf, idx)
@@ -171,6 +195,13 @@
 				or
 				 (not rs2010x.supports_multiple_platform()))
 			then
+				if cfg.buildtarget.directory ~= '' then
+					_p(2,'<FinalOutputDir>%s</FinalOutputDir>', premake.esc(cfg.buildtarget.directory))
+				end
+				if cfg.objectsdir ~= '' then
+					_p(2,'<IntermediateOutputDir>%s</IntermediateOutputDir>', premake.esc(cfg.objectsdir))
+				end
+
 				if #cfg.includedirs > 0 then
 					_p(2,'<IncludePath>%s;$(IncludePath)</IncludePath>', premake.esc(path.translate(table.concat(cfg.includedirs, ";"), '\\')))
 				end
@@ -182,17 +213,16 @@
 				if #cfg.defines > 0 then
 					_p(2, '<Defines>%s;$(Defines)</Defines>', table.concat(premake.esc(cfg.defines), ";"))
 				end
-			end
---			_p(2,'<BCC_wpar>true</BCC_wpar>')						-- TODO: Support Option Config
-			_p(2,'<BCC_whid>false</BCC_whid>')						-- W8022 '関数1' が仮想関数 '関数2' を隠蔽する (-whid)
-			_p(2,'<BCC_wccc>false</BCC_wccc>')						-- W8008 条件が常に真 (-wccc)
-			_p(2,'<BCC_wpch>false</BCC_wpch>')						-- W8058 プリコンパイルヘッダーを作成できない (-wpch)
-			_p(2,'<BCC_wpar>false</BCC_wpar>')						-- W8057 パラメータは一度も使用されない (-wpar)
-			_p(2,'<BCC_wrch>false</BCC_wrch>')						-- W8066 実行されないコード (-wrch)
-			_p(2,'<BCC_wpia>false</BCC_wpia>')						-- W8060 おそらく不正な代入 (-wpia)
 
---			_p(2,'<BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>')
---			_p(2,'<BCC_ExtendedErrorInfo>true</BCC_ExtendedErrorInfo>')
+				if #cfg.bcc_disable_warnings > 0 then
+					for _, item in ipairs(cfg.bcc_disable_warnings) do
+						_p(2,'<BCC_%s>false</BCC_%s>', item, item)
+					end
+				end
+			end
+		
+			bcc_options(cfg)
+		
 		_p(1,'</PropertyGroup>')		   		
 	end
 
