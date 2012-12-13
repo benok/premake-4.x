@@ -183,6 +183,7 @@
 		_p(1,'<PropertyGroup Condition="%s">', _config_cond_expr_on_use(radconf.name, idx, rad_platform))
 			if conf_symbol == 'Base' then
 				_p(2,'<ProjectType>%s</ProjectType>', radstudio.cbproj.project_types[prj.kind])
+				_p(2,'<Multithreaded>true</Multithreaded>') -- always enabled. follow Visual Studio behaviour
 --				_p(2,'<OutputExt>lib</OutputExt>')
 --				_p(2,'<DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>')		-- Required ?
 --				_p(2,'<DynamicRTL>true</DynamicRTL>')						-- Required ?
