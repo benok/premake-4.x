@@ -323,6 +323,15 @@
 						item = path.rebase(prjcfg.linktarget.directory, prjcfg.location, cfg.location)
 					elseif (part == "basename") then
 						item = prjcfg.linktarget.basename
+					elseif (part == "name") then
+						item = prjcfg.linktarget.basename
+						if namestyle == "windows" then
+							if premake.iscppproject(cfg) then
+								item = item .. ".lib"
+							elseif premake.isdotnetproject(cfg) then
+								item = item .. ".dll"
+							end
+						end
 					elseif (part == "fullpath") then
 						item = path.rebase(prjcfg.linktarget.fullpath, prjcfg.location, cfg.location)
 					elseif (part == "object") then
