@@ -258,6 +258,8 @@
 		cpp	= "CppCompile",
 		cxx	= "CppCompile",
 		cc	= "CppCompile",
+		lib = "LibFiles",
+		a   = "LibFiles",
 		--		rc  = "ResourceCompile"
 	}
 	
@@ -278,6 +280,7 @@
 		{
 			_CppInclude = {},
 			CppCompile = {},
+			LibFiles = {},
 			None = {},
 			All = {},
 --			ResourceCompile = {}
@@ -314,6 +317,7 @@
 		next_idx = 0
 		next_idx = set_build_order(build_order, next_idx, classified._CppInclude)
 		next_idx = set_build_order(build_order, next_idx, classified.CppCompile)
+		next_idx = set_build_order(build_order, next_idx, classified.LibFiles)
 		next_idx = set_build_order(build_order, next_idx, classified.None)
 --		next_idx = set_build_order(build_order, next_idx, classified.All)
 	end
@@ -329,13 +333,66 @@
 					print("error! not found: " .. file)
 				end
 				_p(3, '<BuildOrder>%d</BuildOrder>', build_order[file])
+--				_p(3, '<IgnorePath>%s</IgnorePath>', iif(ignore_path[file], 'true', 'false'))
 			_p(2, '</%s>', action)
 		end
 	end
 
+
+-- http://pastebin.com/4hwWg6KM	
+function flatten(t)
+	local r = {}
+	for k,v in pairs(t) do
+		if(type(v) == "table") then
+			for k,v in pairs(flatten(v)) do
+				r[#r+1] = v
+			end
+		else
+			r[#r+1] = v
+		end
+	end
+	return r
+end
+
+-- http://stackoverflow.com/questions/1410862/concatenation-of-tables-in-lua
+function array_concat(...)
+    local t = {}
+
+    for i = 1, arg.n do
+        local array = arg[i]
+        if (type(array) == "table") then
+            for j = 1, #array do
+                t[#t+1] = array[j]
+            end
+        else
+            t[#t+1] = array
+        end
+    end
+
+    return t
+end
+
+--[[
+function array_print(items)
+	for _, item in ipairs(items) do
+		print(item)
+	end
+end
+--]]
 	function rs2010x.files(prj)
 		cfg = premake.getconfig(prj)
-		local classified = classify_input_files(cfg.files)
+		local files = cfg.files
+		local links = array_concat(
+								   premake.getlinks(cfg, "siblings", "name"), -- need (Libname).lib
+								   premake.getlinks(cfg, "system", "fullpath")
+		)
+		if #links > 0 then
+			files = array_concat(files, links)
+--			array_print(links)
+--		else
+--			print("no links")			
+		end
+		local classified = classify_input_files(files)
 		determine_build_order(classified)
 		write_all_blocks(classified.All, build_order)
 	end
