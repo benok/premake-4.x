@@ -101,22 +101,20 @@
 	end
 		
 	function rs2010x.config_definition_block(platform, radconf, idx)
+--		print('**platform('.. platform ..')')		
 		local rad_platform = radstudio.supported_platforms()[platform]
---		print('**config_definition_block('..rad_platform..','..radconf.name..','..idx..')')		
-		_p(1,'<PropertyGroup Condition="%s">', _config_cond_expr_on_define(radconf.name, idx, rad_platform))
+--		print('**config_definition_block('..rad_platform..','..radconf..','..idx..')')		
+		_p(1,'<PropertyGroup Condition="%s">', _config_cond_expr_on_define(radconf, idx, rad_platform))
 		    local sym = _config_symbol(idx, rad_platform)
 			if sym ~= 'Base' then
 				_p(2,'<%s>true</%s>', sym, sym) -- put self defined
 			end
-			if radconf.parent ~= nil then
+			if radconf ~= 'Base' then
 				-- have parent
 				if (rad_platform == nil) or (rad_platform == 'Base') then
---					printf('HaveParent&Base', radconf.parent)
---					printf('<CfgParent>%s</CfgParent>', radconf.parent)				   
-					_p(2,'<CfgParent>%s</CfgParent>', radconf.parent)
+					_p(2,'<CfgParent>%s</CfgParent>', 'Base')
 				else
 					local parent_sym = _config_symbol(idx)
---					printf('HaveParent&NotBasePlatform. rad_plat='..rad_platform..',idx='.. idx ..',parent=' .. radconf.parent .. ',parent_sym='..parent_sym)
 --					printf('<CfgParent>%s</CfgParent>', parent_sym)
 					_p(2,'<CfgParent>%s</CfgParent>', parent_sym)
 					_p(2,'<%s>true</%s>', parent_sym, parent_sym)
@@ -132,15 +130,15 @@
 	end
 	
 	function rs2010x.config_definition_blocks(prj, platforms)
-		for i, radconf in ipairs(radstudio.config_tree) do
-			if rs2010x.supports_multiple_platform() then
+		for i, radconf in ipairs(radstudio.rstudio_configs()) do
+			if rs2010x.supports_multiple_platform() then				
 				-- multi platform
-				for _, platform in ipairs(platforms) do
+				for _, platform in ipairs(array_concat('_Base', platforms)) do
 					rs2010x.config_definition_block(platform, radconf, i)
 				end
 			else
 				-- single platform (x32=Win32) only
-				rs2010x.config_definition_block('Base', radconf, i)
+				rs2010x.config_definition_block('_Base', radconf, i)
 			end
 		end
 	end
@@ -178,9 +176,9 @@
 --		print("platform:"..platform)
 		local rad_platform = radstudio.supported_platforms()[platform]
 		local conf_symbol = _config_symbol(idx, rad_platform)
---		print('**config_definition_block('..rad_platform..','..radconf.name..','..idx..')')
+--		print('**config_block('..rad_platform..','..radconf..','..idx..')')
 
-		_p(1,'<PropertyGroup Condition="%s">', _config_cond_expr_on_use(radconf.name, idx, rad_platform))
+		_p(1,'<PropertyGroup Condition="%s">', _config_cond_expr_on_use(radconf, idx, rad_platform))
 			if conf_symbol == 'Base' then
 				_p(2,'<ProjectType>%s</ProjectType>', radstudio.cbproj.project_types[prj.kind])
 				_p(2,'<Multithreaded>true</Multithreaded>') -- always enabled. follow Visual Studio behaviour
@@ -189,7 +187,7 @@
 --				_p(2,'<DynamicRTL>true</DynamicRTL>')						-- Required ?
 			end
 
-			local cfg = premake.getconfig(prj, radconf.name, platform)
+			local cfg = premake.getconfig(prj, radconf, platform)
 		
 			if cfg and
 				((rs2010x.supports_multiple_platform() and (rad_platform ~= 'Base'))
@@ -228,15 +226,15 @@
 	end
 
 	function rs2010x.config_blocks(prj, platforms)
-		for i, radconf in ipairs(radstudio.config_tree) do
+		for i, radconf in ipairs(radstudio.rstudio_configs()) do
 			if rs2010x.supports_multiple_platform() then
 				-- multi platform
-				for _, platform in ipairs(platforms) do
+				for _, platform in ipairs(array_concat('_Base', platforms)) do
 					rs2010x.config_block(prj, platform, radconf, i)
 				end
 			else
 				-- single platform (x32=Win32) only
-				rs2010x.config_block(prj, 'Generic', radconf, i)
+				rs2010x.config_block(prj, '_Base', radconf, i)
 			end
 		end
 	end
@@ -373,22 +371,30 @@ function array_concat(...)
 end
 
 --[[
-function array_print(items)
+function array_print(items, label)
+	if (label ~= nil) then print('<' .. label .. '>')  end
 	for _, item in ipairs(items) do
 		print(item)
 	end
+	if (label ~= nil) then print('</' .. label .. '>') end
+	print("")
 end
 --]]
+
 	function rs2010x.files(prj)
 		cfg = premake.getconfig(prj)
 		local files = cfg.files
-		local links = array_concat(
-								   premake.getlinks(cfg, "siblings", "name"), -- need (Libname).lib
-								   premake.getlinks(cfg, "system", "fullpath")
-		)
+--		array_print(files, 'files')
+
+		local sibl = premake.getlinks(cfg, "siblings", "name")
+		local sysl = premake.getlinks(cfg, "system", "fullpath")
+		local links = array_concat( sibl, sysl )
+--		array_print(sysl, 'sysl')
+--		array_print(sibl, 'sibl')
+
 		if #links > 0 then
 			files = array_concat(files, links)
---			array_print(links)
+--			array_print(links, 'links')
 --		else
 --			print("no links")			
 		end
@@ -398,11 +404,11 @@ end
 	end
 	
 	function rs2010x.build_configs()
-		for i, radconf in ipairs(radstudio.config_tree) do
-			_p(2,'<BuildConfiguration Include="%s">', radconf.name)
+		for i, radconf in ipairs(radstudio.rstudio_configs()) do
+			_p(2,'<BuildConfiguration Include="%s">', radconf)
 				_p(3,'<Key>%s</Key>', _config_symbol(i))
-				if (radconf.parent) then
-					_p(3,'<CfgParent>%s</CfgParent>', radconf.parent)
+				if (radconf ~= 'Base') then
+					_p(3,'<CfgParent>%s</CfgParent>', 'Base')
 				end
 			_p(2,'</BuildConfiguration>')
 		end
@@ -462,9 +468,9 @@ end
 				_p(2,'<FrameworkType>%s</FrameworkType>', 'None') -- TODO: make configurable
 				_p(2,'<Base>true</Base>')				
 			end		
-			_p(2,"<Config Condition=\"'$(Config)'==''\">%s</Config>", 'Debug');		-- TODO: make configurable
+			_p(2,"<Config Condition=\"'$(Config)'==''\">%s</Config>", radstudio.rstudio_configs()[2]);		-- 1..Base, 2..first config
 			if false then
-				_p(2,"<Platform Condition=\"'$(Platform)'==''\">%s</Platform>", 'Win32'); -- TODO: make configurable
+				_p(2,"<Platform Condition=\"'$(Platform)'==''\">%s</Platform>", radstudio.supported_platforms()[platforms[2]]); -- 1..Base, 2..first platform
 				_p(2,"<TargetedPlatforms>%d</TargetedPlatforms>", 1); 				-- TODO: make configurable
 				_p(2,'<AppType>%s</AppType>', radstudio.app_types[prj.kind])
 			end

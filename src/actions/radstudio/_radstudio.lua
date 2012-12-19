@@ -17,7 +17,7 @@
 --
 	radstudio.platforms = { 
 		Native  = "Win32",
-		Generic = "Base",		-- used for base config
+		_Base   = "Base",		-- used for base config
 		x32     = "Win32", 
 		x64     = "Win64",
 		Universal32	= "OSX32",
@@ -26,19 +26,19 @@
 
 	radstudio.rs2010.platforms = { 
 		Native  = "Win32",
-		Generic = "Base",		-- used for base config
+		_Base   = "Base",		-- used for base config
 		x32     = "Win32", 
 	}
 
 	radstudio.rsxe.platforms = { 
 		Native  = "Win32",
-		Generic = "Base",		-- used for base config
+		_Base   = "Base",		-- used for base config
 		x32     = "Win32", 
 	}
 	
 	radstudio.rsxe2.platforms = { 
 		Native  = "Win32",
-		Generic = "Base",		-- used for base config
+		_Base   = "Base",		-- used for base config
 		x32     = "Win32", 
 --		x64     = "Win64",		-- C++ Builder doesn't support x64
 		Universal32	= "OSX32",
@@ -47,17 +47,11 @@
 
 	radstudio.rsxe3.platforms = { 
 		Native  = "Win32",
-		Generic = "Base",		-- used for base config
+		_Base   = "Base",		-- used for base config
 		x32     = "Win32", 
 		x64     = "Win64",
 		Universal32	= "OSX32",
 		Universal64	= "OSX64",
-	}
-	
-	radstudio.config_tree = {
-		{name = "Base", parent = nil},
-		{name = "Debug", parent = "Base"},
-		{name = "Release", parent = "Base"},
 	}
 
 	-- map from premake's kind to RadStudio's AppType
@@ -242,6 +236,28 @@ function radstudio.write_utf8_bom()
 	io.eol = prev_eol
 end
 
+
+-- http://stackoverflow.com/questions/1410862/concatenation-of-tables-in-lua
+function array_concat(...)
+    local t = {}
+
+    for i = 1, arg.n do
+        local array = arg[i]
+        if (type(array) == "table") then
+            for j = 1, #array do
+                t[#t+1] = array[j]
+            end
+        else
+            t[#t+1] = array
+        end
+    end
+
+    return t
+end
+
+function radstudio.rstudio_configs()
+	return array_concat('Base', configurations())
+end
 -- --
 -- -- Process the solution's list of configurations and platforms, creates a list
 -- -- of build configuration/platform pairs in a RAD Studio compatible format.
