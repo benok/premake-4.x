@@ -67,6 +67,10 @@
 	function rs2010x.import_first()
 		return (_ACTION <= "rs2010") or (_ACTION == "rsxe")
 	end
+
+	function rs2010x.need_novcl()
+		return (_ACTION <= "rs2010") or (_ACTION == "rsxe")
+	end
 	
 	local function _config_symbol(idx, platform)
 		local result = ''
@@ -134,11 +138,11 @@
 			if rs2010x.supports_multiple_platform() then				
 				-- multi platform
 				for _, platform in ipairs(array_concat('_Base', platforms)) do
-					rs2010x.config_definition_block(platform, radconf, i)
+					rs2010x.config_definition_block(platform, radconf, i, true)
 				end
 			else
 				-- single platform (x32=Win32) only
-				rs2010x.config_definition_block('_Base', radconf, i)
+				rs2010x.config_definition_block('_Base', radconf, i, false)
 			end
 		end
 	end
@@ -182,12 +186,21 @@
 			if conf_symbol == 'Base' then
 				_p(2,'<ProjectType>%s</ProjectType>', radstudio.cbproj.project_types[prj.kind])
 				_p(2,'<Multithreaded>true</Multithreaded>') -- always enabled. follow Visual Studio behaviour
+
+				if (prj.kind == "ConsoleApp") and rs2010x.need_novcl() then
+					_p(2,'<NoVCL>true</NoVCL>') -- this is required to 
+				end
 --				_p(2,'<OutputExt>lib</OutputExt>')
 --				_p(2,'<DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>')		-- Required ?
 --				_p(2,'<DynamicRTL>true</DynamicRTL>')						-- Required ?
 			end
 
-			local cfg = premake.getconfig(prj, radconf, platform)
+			local cfg;
+ 			if rs2010x.supports_multiple_platform() then
+				cfg = premake.getconfig(prj, radconf, platform)
+			else
+				cfg = premake.getconfig(prj, radconf, 'x32') -- only supports 'Win32'
+			end
 		
 			if cfg and
 				((rs2010x.supports_multiple_platform() and (rad_platform ~= 'Base'))
