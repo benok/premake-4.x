@@ -349,22 +349,6 @@
 		end
 	end
 
-
--- http://pastebin.com/4hwWg6KM	
-function flatten(t)
-	local r = {}
-	for k,v in pairs(t) do
-		if(type(v) == "table") then
-			for k,v in pairs(flatten(v)) do
-				r[#r+1] = v
-			end
-		else
-			r[#r+1] = v
-		end
-	end
-	return r
-end
-
 -- http://stackoverflow.com/questions/1410862/concatenation-of-tables-in-lua
 function array_concat(...)
     local t = {}

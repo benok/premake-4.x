@@ -258,32 +258,7 @@ end
 function radstudio.rstudio_configs()
 	return array_concat('Base', configurations())
 end
--- --
--- -- Process the solution's list of configurations and platforms, creates a list
--- -- of build configuration/platform pairs in a RAD Studio compatible format.
--- --
--- 	function radstudio.buildconfigs(sln)
--- 		local cfgs = { }
--- 		
--- 		-- sln中のplatformから、radstudioでサポートされているものをtableで返す。中身はx86など。sln側の表現
--- 		local platforms = premake.filterplatforms(sln, radstudio.platforms, "Native")
--- 
--- 		-- sln中のすべてのconfigurationに対して、platforms毎に、
--- 		for _, buildcfg in ipairs(sln.configurations) do
--- 			for _, platform in ipairs(platforms) do
--- 				local entry = { }
--- 				entry.src_buildcfg = buildcfg          -- "Debug"など
--- 				entry.src_platform = platform          -- "x86"など
--- 				
--- 				entry.buildcfg = platform .. " " .. buildcfg     -- "x86 Debug"など
--- 				entry.platform = radstudio.platforms[platform]  -- "Win32"など
--- 				
--- 				-- create a name the way VS likes it 
--- 				entry.name = entry.buildcfg .. "|" .. entry.platform -- "x86 Debug|Win32"など　(不要そう)
--- 				
--- 				table.insert(cfgs, entry)
--- 			end
--- 		end
--- 		return cfgs		
--- 	end
--- 	
+
+--TODO
+-- * Support "Native" platform
+-- * Support vpath
