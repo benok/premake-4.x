@@ -211,6 +211,7 @@
 					_p(2,'<FinalOutputDir>%s</FinalOutputDir>', premake.esc(cfg.buildtarget.directory))
 				end
 				if cfg.objectsdir ~= '' then
+					_p(2,'<BRCC_OutputDir>%s</BRCC_OutputDir>', premake.esc(cfg.objectsdir))
 					_p(2,'<IntermediateOutputDir>%s</IntermediateOutputDir>', premake.esc(cfg.objectsdir))
 				end
 
