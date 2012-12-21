@@ -30,7 +30,7 @@
 			_p(1, '</ItemGroup>')
 
 			
-			_p(1, '<ProjectExtentions>')
+			_p(1, '<ProjectExtensions>')
 				_p(2, '<Borland.Personality>Default.Personality.12</Borland.Personality>')
 				_p(2, '<Borland.ProjectType/>')
 				_p(2, '<Borland.Project>')
@@ -38,7 +38,7 @@
 						_p(4, '<Default.Personality/>')
 					_p(3, '</Borland.Project>')
 				_p(2, '</Borland.Project>')
-			_p(1, '</ProjectExtentions>')
+			_p(1, '</ProjectExtensions>')
 
 			-- Expand Project Targets --
 			for prj in premake.solution.eachproject(sln) do
