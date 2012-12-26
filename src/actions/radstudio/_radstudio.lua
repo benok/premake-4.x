@@ -4,6 +4,13 @@
 -- Copyright (c) 2008-2011 Jason Perkins and the Premake project
 --
 
+--TODO
+-- * Support "Native" platform
+-- * Support vpath
+-- * Fix fails to save groupproj(?) when location is specified.
+-- * remove *.local on 'clean' action
+
+
 	premake.radstudio = { }
 	local radstudio = premake.radstudio
 
@@ -258,7 +265,3 @@ end
 function radstudio.rstudio_configs()
 	return array_concat('Base', configurations())
 end
-
---TODO
--- * Support "Native" platform
--- * Support vpath
