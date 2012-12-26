@@ -186,6 +186,7 @@
 			if conf_symbol == 'Base' then
 				_p(2,'<ProjectType>%s</ProjectType>', radstudio.cbproj.project_types[prj.kind])
 				_p(2,'<Multithreaded>true</Multithreaded>') -- always enabled. follow Visual Studio behaviour
+				_p(2,'<RunBCCOutOfProcess>true</RunBCCOutOfProcess>') -- fix 'bcc32 exeited with code 1' error on low memory machine
 
 				if (prj.kind == "ConsoleApp") and rs2010x.need_novcl() then
 					_p(2,'<NoVCL>true</NoVCL>') -- this is required to 
@@ -272,7 +273,7 @@
 		cc	= "CppCompile",
 		lib = "LibFiles",
 		a   = "LibFiles",
-		--		rc  = "ResourceCompile"
+		rc  = "ResourceCompile",
 	}
 	
 	local function action_type(filename)
@@ -295,7 +296,7 @@
 			LibFiles = {},
 			None = {},
 			All = {},
---			ResourceCompile = {}
+			ResourceCompile = {}
 		}
 		
 		for _, current_file in ipairs(files) do
@@ -330,6 +331,7 @@
 		next_idx = set_build_order(build_order, next_idx, classified._CppInclude)
 		next_idx = set_build_order(build_order, next_idx, classified.CppCompile)
 		next_idx = set_build_order(build_order, next_idx, classified.LibFiles)
+		next_idx = set_build_order(build_order, next_idx, classified.ResourceCompile)
 		next_idx = set_build_order(build_order, next_idx, classified.None)
 --		next_idx = set_build_order(build_order, next_idx, classified.All)
 	end
@@ -343,6 +345,10 @@
 			_p(2, '<%s Include="%s">', action, file)
 				if not build_order[file] then
 					print("error! not found: " .. file)
+				end
+				if action == 'ResourceCompile' then
+					_p(3, '<ModuleName>%s</ModuleName>', file)
+					_p(3, '<Form>%s</Form>', path.getbasename(file) .. '.res')
 				end
 				_p(3, '<BuildOrder>%d</BuildOrder>', build_order[file])
 --				_p(3, '<IgnorePath>%s</IgnorePath>', iif(ignore_path[file], 'true', 'false'))
