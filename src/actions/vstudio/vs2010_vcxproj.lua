@@ -417,6 +417,14 @@
 			end
 
 			import_lib(cfg)
+
+			-- #154 adds .def file support for vs2010
+			-- http://sourceforge.net/p/premake/patches/154/
+			-- vs2010 doesn't generate the <moduledefinitionfile> tag. This patch fixes the omission
+			local deffile = premake.findfile(cfg, ".def")
+			if deffile then
+				_p(3,'<ModuleDefinitionFile>%s</ModuleDefinitionFile>', deffile)
+			end
 			link_target_machine(3,cfg)
 			additional_options(3,cfg)
 		end
