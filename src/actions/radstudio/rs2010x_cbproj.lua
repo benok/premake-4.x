@@ -460,7 +460,7 @@ end
 		io.eol = '\r\n'
 		radstudio.write_utf8_bom()
 
- 		-- sln中のplatformから、radstudioでサポートされているものをtableで返す。中身はx86など。premake側の表現
+ 		-- filter platforms in sln and return as tables (e.g. x86 etc.)
  		local platforms = premake.filterplatforms(prj.solution, radstudio.supported_platforms(), "Native")
 		
 	   _p('<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">')

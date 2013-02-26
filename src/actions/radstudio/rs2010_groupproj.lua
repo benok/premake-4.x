@@ -10,7 +10,7 @@
 	
 	function gproj2010.generate(sln)
 
-		-- Precompute RAD Studio configurations(plaformとRelease/Debugの組み合わせなど)
+		-- Precompute RAD Studio configurations(plaform & Release/Debug combinations)
 		--sln.radstudio_configs = premake.radstudio.buildconfigs(sln)
 		
 		-- Mark the file as Unicode
