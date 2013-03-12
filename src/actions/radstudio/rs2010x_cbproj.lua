@@ -155,12 +155,23 @@
 		if cfg.flags.Symbols then
 			_p(2, '<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>')
 			_p(2, '<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>')
+			-- compiler options for debug -- 
+			_p(2, '<BCC_ExtendedErrorInfo>true</BCC_ExtendedErrorInfo>')
+			_p(2, '<BCC_UseRegisterVariables>None</BCC_UseRegisterVariables>')
+			_p(2, '<BCC_DisableOptimizations>true</BCC_DisableOptimizations>')
+			_p(2, '<BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>')
+			-- linker options for debug -- 
+			_p(2, '<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>')
+			-- assembler options for debug --
+			_p(2, '<TASM_DisplaySourceLines>true</TASM_DisplaySourceLines>')		
 		end
 		
 		if cfg.flags.Optimize or cfg.flags.OptimizeSpeed then
 			_p(2, '<BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>')
+			_p(2, '<BCC_UseRegisterVariables>None</BCC_UseRegisterVariables>')
 		elseif cfg.flags.OptimizeSize then
 			_p(2, '<BCC_OptimizeForSize>true</BCC_OptimizeForSize>')
+			_p(2, '<BCC_UseRegisterVariables>None</BCC_UseRegisterVariables>')
 		end
 				
 		if cfg.flags.NoPCH then
@@ -188,6 +199,9 @@
 				_p(2,'<Multithreaded>true</Multithreaded>') -- always enabled. follow Visual Studio behaviour
 				_p(2,'<RunBCCOutOfProcess>true</RunBCCOutOfProcess>') -- fix 'bcc32 exeited with code 1' error on low memory machine
 				_p(2,'<TLIB_PageSize>512</TLIB_PageSize>') -- fix 'bcc32 exited with code 1' error on low memory machine
+				--
+				_p(2,'<_TCHARMapping>char</_TCHARMapping>') -- 
+				_p(2,'<BCC_StackFrames>true</BCC_StackFrames>') -- standard stack frame: ON
 
 				if (prj.kind == "ConsoleApp") and rs2010x.need_novcl() then
 					_p(2,'<NoVCL>true</NoVCL>') -- this is required to 
