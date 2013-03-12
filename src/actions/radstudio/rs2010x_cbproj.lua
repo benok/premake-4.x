@@ -187,6 +187,7 @@
 				_p(2,'<ProjectType>%s</ProjectType>', radstudio.cbproj.project_types[prj.kind])
 				_p(2,'<Multithreaded>true</Multithreaded>') -- always enabled. follow Visual Studio behaviour
 				_p(2,'<RunBCCOutOfProcess>true</RunBCCOutOfProcess>') -- fix 'bcc32 exeited with code 1' error on low memory machine
+				_p(2,'<TLIB_PageSize>512</TLIB_PageSize>') -- fix 'bcc32 exited with code 1' error on low memory machine
 
 				if (prj.kind == "ConsoleApp") and rs2010x.need_novcl() then
 					_p(2,'<NoVCL>true</NoVCL>') -- this is required to 
