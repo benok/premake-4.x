@@ -100,6 +100,7 @@
 			allowed = function(value)
 			
 				local allowed_flags = {
+					BccUseNewCompiler = 1,
 					DebugEnvsDontMerge = 1,
 					DebugEnvsInherit = 1,
 					EnableSSE = 1,

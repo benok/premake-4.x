@@ -152,6 +152,9 @@
 		if cfg == nil then
 			return
 		end
+		if cfg.flags.BccUseNewCompiler then
+			_p(2, '<BCC_UseClassicCompiler>false</BCC_UseClassicCompiler>')
+		end
 		if cfg.flags.Symbols then
 			_p(2, '<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>')
 			_p(2, '<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>')
@@ -357,7 +360,11 @@
 			if not action then
 				print ('unknown action: ' .. file)
 			end
-			_p(2, '<%s Include="%s">', action, file)
+			if action == 'LibFiles' then
+				_p(2, '<%s Include="%s">', action, path.getbasename(file))
+			else
+				_p(2, '<%s Include="%s">', action, file)
+			end
 				if not build_order[file] then
 					print("error! not found: " .. file)
 				end
