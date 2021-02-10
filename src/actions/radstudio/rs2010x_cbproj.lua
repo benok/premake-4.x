@@ -246,10 +246,14 @@
 					_p(2, '<Defines>%s;$(Defines)</Defines>', table.concat(premake.esc(cfg.defines), ";"))
 				end
 
-				if #cfg.bcc_disable_warnings > 0 then
+				if (platform == 'x32') and (not cfg.flags.BccUseNewCompiler) and (#cfg.bcc_disable_warnings > 0) then
 					for _, item in ipairs(cfg.bcc_disable_warnings) do
 						_p(2,'<BCC_%s>false</BCC_%s>', item, item)
 					end
+				end	
+
+				if (((platform == 'x32') and (not cfg.flags.BccUseNewCompiler)) or (platform ~= 'x32')) and (#cfg.bcc_clang_options > 0) then
+					_p(2,'<BCC_UserSuppliedOptions>%s</BCC_UserSuppliedOptions>', table.concat(cfg.bcc_clang_options, ' '))
 				end
 			end
 		

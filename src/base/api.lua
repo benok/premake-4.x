@@ -36,6 +36,12 @@
 			scope = "config",
 		},
 		
+		bcc_clang_options =
+		{
+			kind  = "list",
+			scope = "config",
+		},
+		
 		buildoptions =
 		{
 			kind  = "list",
