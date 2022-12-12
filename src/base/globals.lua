@@ -49,6 +49,12 @@
 			nosharedlibs    = true,
 			namestyle       = "PS3",
 		},
+		WiiDev =
+		{
+			cfgsuffix       = "wii",
+			iscrosscompiler = true,
+			namestyle       = "PS3",
+		},
 		Xbox360 = 
 		{ 
 			cfgsuffix       = "xbox360",

@@ -15,7 +15,7 @@
 #if defined(__linux__)
 #define PLATFORM_LINUX    (1)
 #define PLATFORM_STRING   "linux"
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 #define PLATFORM_BSD      (1)
 #define PLATFORM_STRING   "bsd"
 #elif defined(__APPLE__) && defined(__MACH__)
@@ -28,7 +28,7 @@
 #define PLATFORM_HAIKU    (1)
 #define PLATFORM_STRING   "haiku"
 #else
-#define PLATFORM_WINDOWS  (1) 
+#define PLATFORM_WINDOWS  (1)
 #define PLATFORM_STRING   "windows"
 #endif
 
@@ -67,7 +67,13 @@ int os_matchstart(lua_State* L);
 int os_mkdir(lua_State* L);
 int os_pathsearch(lua_State* L);
 int os_rmdir(lua_State* L);
+int os_stat(lua_State* L);
 int os_uuid(lua_State* L);
 int string_endswith(lua_State* L);
 
+
+/* Engine interface */
+int premake_init(lua_State* L);
+int premake_locate(lua_State* L, const char* argv0);
+int premake_execute(lua_State* L, int argc, const char** argv);
 

@@ -32,7 +32,7 @@
 	end
 
 	local function prepare()
-		premake.buildconfigs()
+		premake.bake.buildconfigs()
 		sln.vstudio_configs = premake.vstudio.buildconfigs(sln)
 
 		local cfg = premake.getconfig(sln.projects[2])
@@ -231,27 +231,6 @@
 	<Globals>
 	</Globals>
 </VisualStudioProject>
-		]]
-	end
-
-
---
--- Test the <Configuration> element
---
-
-	function suite.Configuration_OnMFCFlag()
-		flags { "MFC" }
-		prepare()
-		vc200x.Configuration("Debug|Win32", premake.getconfig(prj, "Debug"))
-		test.capture [[
-		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory="."
-			IntermediateDirectory="obj\Debug\MyProject"
-			ConfigurationType="1"
-			UseOfMFC="2"
-			CharacterSet="2"
-			>
 		]]
 	end
 
@@ -678,7 +657,7 @@
 		language 'C++'
 		kind 'StaticLib'
 
-		premake.buildconfigs()
+		premake.bake.buildconfigs()
 		sln1.vstudio_configs = premake.vstudio.buildconfigs(sln1)
 		prj1= premake.getconfig(sln1.projects[1])
 		vc200x.generate(prj1)
@@ -695,7 +674,7 @@
 		language 'C++'
 		kind 'StaticLib'
 
-		premake.buildconfigs()
+		premake.bake.buildconfigs()
 		sln1.vstudio_configs = premake.vstudio.buildconfigs(sln1)
 		prj1= premake.getconfig(sln1.projects[1])
 		vc200x.generate(prj1)

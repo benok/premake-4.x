@@ -1,7 +1,7 @@
 --
 -- project.lua
 -- Functions for working with the project data.
--- Copyright (c) 2002-2009 Jason Perkins and the Premake project
+-- Copyright (c) 2002 Jason Perkins and the Premake project
 --
 
 	premake.project = { }
@@ -21,8 +21,15 @@
 		local tr = premake.tree.new(prj.name)
 		tr.project = prj
 
-		for fcfg in premake.eachfile(prj) do
-			local node = premake.tree.add(tr, fcfg.name)
+		local isvpath
+		
+		local function onadd(node)
+			node.isvpath = isvpath
+		end
+		
+		for fcfg in premake.project.eachfile(prj) do
+			isvpath = (fcfg.name ~= fcfg.vpath)			
+			local node = premake.tree.add(tr, fcfg.vpath, onadd)
 			node.cfg = fcfg
 		end
 
@@ -58,7 +65,7 @@
 -- Iterator for a project's files; returns a file configuration object.
 --
 
-	function premake.eachfile(prj)
+	function premake.project.eachfile(prj)
 		-- project root config contains the file config list
 		if not prj.project then prj = premake.getconfig(prj) end
 		local i = 0
@@ -66,7 +73,9 @@
 		return function ()
 			i = i + 1
 			if (i <= #t) then
-				return prj.__fileconfigs[t[i]]
+				local fcfg = prj.__fileconfigs[t[i]]
+				fcfg.vpath = premake.project.getvpath(prj, fcfg.name)
+				return fcfg
 			end
 		end
 	end
@@ -432,7 +441,10 @@
 		local kind = cfg.kind
 		if premake.iscppproject(cfg) then
 			-- On Windows, shared libraries link against a static import library
-			if (namestyle == "windows" or system == "windows") and kind == "SharedLib" and direction == "link" then
+			if (namestyle == "windows" or system == "windows") 
+				and kind == "SharedLib" and direction == "link" 
+				and not cfg.flags.NoImportLib 
+			then				
 				kind = "StaticLib"
 			end
 
@@ -524,7 +536,68 @@
 	end
 	
 	
-	
+
+--
+-- Given a source file path, return a corresponding virtual path based on
+-- the vpath entries in the project. If no matching vpath entry is found,
+-- the original path is returned.
+--
+
+	function premake.project.getvpath(prj, filename)
+		-- if there is no match, return the input filename
+		local vpath = filename
+		
+		for replacement,patterns in pairs(prj.vpaths) do
+			for _,pattern in ipairs(patterns) do
+				-- does the filename match this vpath pattern?
+				local i = vpath:find(path.wildcards(pattern))
+				if i == 1 then				
+					-- yes; trim the pattern out of the target file's path
+					local leaf
+					i = pattern:find("*", 1, true) or (pattern:len() + 1)
+					if i < filename:len() then
+						leaf = filename:sub(i)
+					else
+						leaf = path.getname(filename)
+					end
+					if leaf:startswith("/") then
+						leaf = leaf:sub(2)
+					end
+					
+					-- check for (and remove) stars in the replacement pattern.
+					-- If there are none, then trim all path info from the leaf
+					-- and use just the filename in the replacement (stars should
+					-- really only appear at the end; I'm cheating here)
+					local stem = ""
+					if replacement:len() > 0 then
+						stem, stars = replacement:gsub("%*", "")
+						if stars == 0 then
+							leaf = path.getname(leaf)
+						end
+					end
+					
+					vpath = path.join(stem, leaf)
+				end
+			end
+		end
+				
+		-- remove any dot ("./", "../") patterns from the start of the path
+		local changed
+		repeat
+			changed = true
+			if vpath:startswith("./") then
+				vpath = vpath:sub(3)
+			elseif vpath:startswith("../") then
+				vpath = vpath:sub(4)
+			else
+				changed = false
+			end
+		until not changed
+		
+		return vpath
+	end
+
+
 -- 
 -- Returns true if the solution contains at least one C/C++ project.
 --
@@ -554,6 +627,15 @@
 
 
 --
+-- Returns true if the project use the C language.
+--
+
+	function premake.project.iscproject(prj)
+		return prj.language == "C"
+	end
+
+
+--
 -- Returns true if the project uses a C/C++ language.
 --
 
@@ -569,55 +651,4 @@
 
 	function premake.isdotnetproject(prj)
 		return (prj.language == "C#")
-	end
-	
-	
-
---
--- Walk the list of source code files, breaking them into "groups" based
--- on the directory hierarchy.
---
-
-	local function walksources(cfg, fn, group, nestlevel, finished)
-		local grouplen = group:len()
-		local gname = iif(group:endswith("/"), group:sub(1, -2), group)
-		
-		-- open this new group
-		if (nestlevel >= 0) then
-			fn(cfg, gname, "GroupStart", nestlevel)
-		end
-		
-		-- scan the list of files for items which belong in this group
-		for _,fname in ipairs(cfg.files) do
-			if (fname:startswith(group)) then
-
-				-- is there a subgroup within this item?
-				local _,split = fname:find("[^\.]/", grouplen + 1)
-				if (split) then
-					local subgroup = fname:sub(1, split)
-					if (not finished[subgroup]) then
-						finished[subgroup] = true
-						walksources(cfg, fn, subgroup, nestlevel + 1, finished)
-					end
-				end
-				
-			end			
-		end
-
-		-- process all files that belong in this group
-		for _,fname in ipairs(cfg.files) do
-			if (fname:startswith(group) and not fname:find("[^\.]/", grouplen + 1)) then
-				fn(cfg, fname, "GroupItem", nestlevel + 1)
-			end
-		end
-
-		-- close the group
-		if (nestlevel >= 0) then
-			fn(cfg, gname, "GroupEnd", nestlevel)
-		end
-	end
-	
-	
-	function premake.walksources(cfg, fn)
-		walksources(cfg, fn, "", -1, {})
 	end

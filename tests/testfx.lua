@@ -86,6 +86,14 @@
 		end
 	end
 	
+
+	function test.isemptycapture()
+		local actual = io.endcapture()
+		if actual ~= "" then
+			test.fail("expected empty capture, but was %s", actual);
+		end
+	end
+
 	
 	function test.isequal(expected, actual)
 		if (type(expected) == "table") then
@@ -183,14 +191,16 @@
 --
 -- Test execution function
 --
-
+	local _OS_host = _OS
 	local function test_setup(suite, fn)
 		-- clear out some important globals
 		_ACTION = "test"
 		_ARGS = { }
 		_OPTIONS = { }
+		_OS = _OS_host
 		premake.solution.list = { }
 		io.indent = nil
+		io.eol = "\n"
 
 		-- reset captured I/O values
 		test.value_openedfilename = nil

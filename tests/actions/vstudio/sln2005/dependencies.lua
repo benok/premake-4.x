@@ -27,7 +27,7 @@
 	local function prepare(language)
 		prj1.language = language
 		prj2.language = language
-		premake.buildconfigs()
+		premake.bake.buildconfigs()
 		prj1 = premake.solution.getproject(sln, 1)
 		prj2 = premake.solution.getproject(sln, 2)
 		sln2005.projectdependencies(prj2)
@@ -55,13 +55,4 @@
 		{AE61726D-187C-E440-BD07-2556188A6565} = {AE61726D-187C-E440-BD07-2556188A6565}
 	EndProjectSection
 		]]
-	end
-
-
-	function suite.On2010_Cs()
-		-- 2010 C# gets rules from the projects rather than the solution
-		_ACTION = "vs2010"
-		prepare("C#")
-		local actual = io.endcapture()
-		test.istrue(actual:len() == 0)
 	end

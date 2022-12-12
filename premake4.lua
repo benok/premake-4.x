@@ -52,19 +52,26 @@
 		configuration "vs2005"
 			defines	{"_CRT_SECURE_NO_DEPRECATE" }
 
+		configuration "windows"
+			links { "ole32" }
+
 		configuration "linux"
 			defines     { "LUA_USE_POSIX", "LUA_USE_DLOPEN" }
 			links       { "m", "dl" } 
+
+		configuration "bsd"
+			defines     { "LUA_USE_POSIX", "LUA_USE_DLOPEN" }
+			links       { "m" } 
 			
 		configuration "macosx"
 			defines     { "LUA_USE_MACOSX" }
 			links       { "CoreServices.framework" }
 			
 		configuration { "macosx", "gmake" }
-			buildoptions { "-mmacosx-version-min=10.1" }
-			linkoptions { "-lstdc++-static", "-mmacosx-version-min=10.1" }
+			buildoptions { "-mmacosx-version-min=10.4" }
+			linkoptions  { "-mmacosx-version-min=10.4" }
 
-		configuration { "linux", "bsd", "macosx" }
+		configuration { "linux or bsd" }
 			linkoptions { "-rdynamic" }
 			
 		configuration { "solaris" }

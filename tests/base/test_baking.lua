@@ -47,7 +47,7 @@
 	end
 
 	local function prepare()
-		premake.buildconfigs()
+		premake.bake.buildconfigs()
 		prj = premake.getconfig(prj)
 		cfg = premake.getconfig(prj, "Debug")
 	end
@@ -57,18 +57,6 @@
 -- Tests
 --
 
-	function suite.SolutionFields()
-		prepare()
-		test.isequal("Debug:Release", table.concat(cfg.configurations,":"))
-	end
-
-	
-	function suite.ProjectFields()
-		prepare()
-		test.isequal("C", cfg.language)
-	end
-
-	
 	function suite.ProjectWideSettings()
 		prepare()
 		test.isequal("SOLUTION:PROJECT:NATIVE", table.concat(prj.defines,":"))

@@ -45,9 +45,13 @@
 					io.input():close()
 				end
 			end
-			
-			table.insert(formats, "%s")	
-			path = (path or "") .. ":/lib:/usr/lib:/usr/local/lib"
+
+			table.insert(formats, "%s")
+			path = path or ""
+			if os.is64bit() then
+				path = path .. ":/lib64:/usr/lib64/:usr/local/lib64"
+			end
+			path = path .. ":/lib:/usr/lib:/usr/local/lib"
 		end
 		
 		for _, fmt in ipairs(formats) do
@@ -212,7 +216,7 @@
 			if part == "." then
 				return true
 			end
-			
+
 			if (part ~= "" and not path.isabsolute(part) and not os.isdir(dir)) then
 				local ok, err = builtin_mkdir(dir)
 				if (not ok) then

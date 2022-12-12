@@ -1,7 +1,7 @@
 --
 -- _premake_main.lua
 -- Script-side entry point for the main program logic.
--- Copyright (c) 2002-2009 Jason Perkins and the Premake project
+-- Copyright (c) 2002-2011 Jason Perkins and the Premake project
 --
 
 
@@ -9,6 +9,7 @@
 	local shorthelp     = "Type 'premake4 --help' for help"
 	local versionhelp   = "premake4 (Premake Build Script Generator) %s"
 	
+	_WORKING_DIR        = os.getcwd()
 
 
 --
@@ -62,6 +63,12 @@
 			end
 		end
 		
+
+		-- Now that the scripts are loaded, I can use path.getabsolute() to properly
+		-- canonicalize the executable path.
+		
+		_PREMAKE_COMMAND = path.getabsolute(_PREMAKE_COMMAND)
+
 
 		-- Set up the environment for the chosen action early, so side-effects
 		-- can be picked up by the scripts.
@@ -137,7 +144,7 @@
 		
 		-- work-in-progress: build the configurations
 		print("Building configurations...")
-		premake.buildconfigs()
+		premake.bake.buildconfigs()
 		
 		ok, err = premake.checkprojects()
 		if (not ok) then error("Error: " .. err, 0) end

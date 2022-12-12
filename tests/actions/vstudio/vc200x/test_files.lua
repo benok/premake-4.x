@@ -1,5 +1,5 @@
 --
--- tests/actions/vstudio/vc200x/files.lua
+-- tests/actions/vstudio/vc200x/test_files.lua
 -- Validate generation of <files/> block in Visual Studio 200x projects.
 -- Copyright (c) 2009-2011 Jason Perkins and the Premake project
 --
@@ -20,7 +20,7 @@
 	end
 	
 	local function prepare()
-		premake.buildconfigs()
+		premake.bake.buildconfigs()
 		prj = premake.solution.getproject(sln, 1)
 		sln.vstudio_configs = premake.vstudio.buildconfigs(sln)
 		vc200x.Files(prj)
@@ -32,18 +32,18 @@
 --
 
 	function suite.SimpleSourceFile()
-		files { "hello.c" }
+		files { "hello.cpp" }
 		prepare()
 		test.capture [[
 		<File
-			RelativePath="hello.c"
+			RelativePath="hello.cpp"
 			>
 		</File>
 		]]
 	end
 
 	function suite.SingleFolderLevel()
-		files { "src/hello.c" }
+		files { "src/hello.cpp" }
 		prepare()
 		test.capture [[
 		<Filter
@@ -51,7 +51,7 @@
 			Filter=""
 			>
 			<File
-				RelativePath="src\hello.c"
+				RelativePath="src\hello.cpp"
 				>
 			</File>
 		</Filter>
@@ -59,7 +59,7 @@
 	end
 
 	function suite.MultipleFolderLevels()
-		files { "src/greetings/hello.c" }
+		files { "src/greetings/hello.cpp" }
 		prepare()
 		test.capture [[
 		<Filter
@@ -71,11 +71,90 @@
 				Filter=""
 				>
 				<File
-					RelativePath="src\greetings\hello.c"
+					RelativePath="src\greetings\hello.cpp"
 					>
 				</File>
 			</Filter>
 		</Filter>
+		]]
+	end
+
+
+--
+-- Non-source code files, such as header files and documentation, should
+-- be marked as such, so the compiler won't attempt to build them.
+--
+
+	function suite.file_markedAsNonBuildable_onSupportFiles()
+		language "c"
+		files { "hello.lua" }
+		prepare()
+		test.capture [[
+		<File
+			RelativePath="hello.lua"
+			>
+		</File>
+		]]
+	end
+
+
+--
+-- Mixed language support
+--
+
+	function suite.CompileAsC_InCppProject()
+		language "c++"
+		files { "hello.c" }
+		prepare()
+		test.capture [[
+		<File
+			RelativePath="hello.c"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					CompileAs="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					CompileAs="1"
+				/>
+			</FileConfiguration>
+		</File>
+		]]
+	end
+
+	function suite.CompileAsCpp_InCProject()
+		language "c"
+		files { "hello.cpp" }
+		prepare()
+		test.capture [[
+		<File
+			RelativePath="hello.cpp"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					CompileAs="2"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					CompileAs="2"
+				/>
+			</FileConfiguration>
+		</File>
 		]]
 	end
 

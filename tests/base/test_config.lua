@@ -18,7 +18,7 @@
 
 	local cfg
 	local function prepare()
-		premake.buildconfigs()
+		premake.bake.buildconfigs()
 		cfg = premake.solution.getproject(sln, 1)
 	end
 
@@ -26,7 +26,24 @@
 --
 -- Debug/Release build testing
 --
+	function suite.IsDebug_ReturnsFalse_EnglishSpellingOfOptimiseFlag()
+		flags { "Optimise" }
+		prepare()
+		return test.isfalse(premake.config.isdebugbuild(cfg))
+	end
+	
+	function suite.IsDebug_ReturnsFalse_EnglishSpellingOfOptimiseSizeFlag()
+		flags { "OptimiseSize" }
+		prepare()
+		return test.isfalse(premake.config.isdebugbuild(cfg))
+	end
 
+	function suite.IsDebug_ReturnsFalse_EnglishSpellingOfOptimiseSpeedFlag()
+		flags { "OptimiseSpeed" }
+		prepare()
+		return test.isfalse(premake.config.isdebugbuild(cfg))
+	end
+	
 	function suite.IsDebug_ReturnsFalse_OnOptimizeFlag()
 		flags { "Optimize" }
 		prepare()

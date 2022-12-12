@@ -32,7 +32,7 @@
 	
 	local get_buffer = function(projectName)
 		io.capture()
-		premake.buildconfigs()
+		premake.bake.buildconfigs()
 		local cfg = premake.getconfig(projectName, 'Debug', 'Native')
 		premake.gmake_cpp_config(cfg, premake.gcc)
 		local buffer = io.endcapture()
@@ -93,4 +93,20 @@
 		test.string_contains(buffer,format_exspected)
 	end
 	
+	function T.link_suite.projectLinksToStaticPremakeMadeLibrary_projectDifferInDirectoryHeights_linksUsingCorrectRelativePath()
 	
+		firstProject = project 'firstProject'
+			kind 'StaticLib'
+			language 'C'
+
+		linksToFirstProject = project 'linksToFirstProject'
+			kind 'ConsoleApp'
+			language 'C'
+			links{'firstProject'}
+			location './foo/bar'
+			
+		local buffer = get_buffer(linksToFirstProject)
+		local format_exspected = 'LIBS      %+%= ../../libfirstProject.a'
+		test.string_contains(buffer,format_exspected)
+	end
+

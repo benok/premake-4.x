@@ -1,22 +1,28 @@
 /**
  * \file   premake.c
  * \brief  Program entry point.
- * \author Copyright (c) 2002-2011 Jason Perkins and the Premake project
+ * \author Copyright (c) 2002-2012 Jason Perkins and the Premake project
  */
 
 #include <stdlib.h>
 #include <string.h>
 #include "premake.h"
 
+#if PLATFORM_MACOSX
+#include <CoreFoundation/CFBundle.h>
+#endif
+
 
 #define VERSION        "HEAD"
-#define COPYRIGHT      "Copyright (C) 2002-2011 Jason Perkins and the Premake Project"
+#define COPYRIGHT      "Copyright (C) 2002-2012 Jason Perkins and the Premake Project"
 #define ERROR_MESSAGE  "%s\n"
 
 
 static int process_arguments(lua_State* L, int argc, const char** argv);
 static int process_option(lua_State* L, const char* arg);
 static int load_builtin_scripts(lua_State* L);
+
+int premake_locate(lua_State* L, const char* argv0);
 
 
 /* A search path for script files */
@@ -49,6 +55,7 @@ static const luaL_Reg os_functions[] = {
 	{ "mkdir",       os_mkdir       },
 	{ "pathsearch",  os_pathsearch  },
 	{ "rmdir",       os_rmdir       },
+	{ "stat",        os_stat        },
 	{ "uuid",        os_uuid        },
 	{ NULL, NULL }
 };
@@ -58,21 +65,16 @@ static const luaL_Reg string_functions[] = {
 	{ NULL, NULL }
 };
 
-/**
- * Program entry point.
- */
-int main(int argc, const char** argv)
-{
-	lua_State* L;
-	int z = OKAY;
 
-	/* prepare Lua for use */
-	L = lua_open();
-	luaL_openlibs(L);
+/**
+ * Initialize the Premake Lua environment.
+ */
+int premake_init(lua_State* L)
+{
 	luaL_register(L, "path",   path_functions);
 	luaL_register(L, "os",     os_functions);
 	luaL_register(L, "string", string_functions);
-	
+
 	/* push the application metadata */
 	lua_pushstring(L, LUA_COPYRIGHT);
 	lua_setglobal(L, "_COPYRIGHT");
@@ -86,16 +88,107 @@ int main(int argc, const char** argv)
 	/* set the OS platform variable */
 	lua_pushstring(L, PLATFORM_STRING);
 	lua_setglobal(L, "_OS");
+		
+	return OKAY;
+}
 
+
+int premake_execute(lua_State* L, int argc, const char** argv)
+{
 	/* Parse the command line arguments */
-	if (z == OKAY)  z = process_arguments(L, argc, argv);
+	int z = process_arguments(L, argc, argv);
 
 	/* Run the built-in Premake scripts */
 	if (z == OKAY)  z = load_builtin_scripts(L);
-
-	/* Clean up and turn off the lights */
-	lua_close(L);
+	
 	return z;
+}
+
+
+/**
+ * Locate the Premake executable, and push its full path to the Lua stack.
+ * Based on:
+ * http://sourceforge.net/tracker/index.php?func=detail&aid=3351583&group_id=71616&atid=531880
+ * http://stackoverflow.com/questions/933850/how-to-find-the-location-of-the-executable-in-c
+ * http://stackoverflow.com/questions/1023306/finding-current-executables-path-without-proc-self-exe
+ */
+int premake_locate(lua_State* L, const char* argv0)
+{
+#if !defined(PATH_MAX)
+#define PATH_MAX  (4096)
+#endif
+
+	char buffer[PATH_MAX];
+	const char* path = NULL;
+
+#if PLATFORM_WINDOWS
+	DWORD len = GetModuleFileName(NULL, buffer, PATH_MAX);
+	if (len > 0)
+		path = buffer;
+#endif
+
+#if PLATFORM_MACOSX
+	CFURLRef bundleURL = CFBundleCopyExecutableURL(CFBundleGetMainBundle());
+	CFStringRef pathRef = CFURLCopyFileSystemPath(bundleURL, kCFURLPOSIXPathStyle);
+	if (CFStringGetCString(pathRef, buffer, PATH_MAX - 1, kCFStringEncodingUTF8))
+		path = buffer;
+#endif
+
+#if PLATFORM_LINUX
+	int len = readlink("/proc/self/exe", buffer, PATH_MAX);
+	if (len > 0)
+		path = buffer;
+#endif
+
+#if PLATFORM_BSD
+	int len = readlink("/proc/curproc/file", buffer, PATH_MAX);
+	if (len < 0)
+		len = readlink("/proc/curproc/exe", buffer, PATH_MAX);
+	if (len > 0)
+		path = buffer;
+#endif
+
+#if PLATFORM_SOLARIS
+	int len = readlink("/proc/self/path/a.out", buffer, PATH_MAX);
+	if (len > 0)
+		path = buffer;
+#endif
+
+	/* As a fallback, search the PATH with argv[0] */
+	if (!path)
+	{
+		lua_pushcfunction(L, os_pathsearch);
+		lua_pushstring(L, argv0);
+		lua_pushstring(L, getenv("PATH"));
+		if (lua_pcall(L, 2, 1, 0) == OKAY && !lua_isnil(L, -1))
+		{
+			lua_pushstring(L, "/");
+			lua_pushstring(L, argv0);
+			lua_concat(L, 3);
+			path = lua_tostring(L, -1);
+		}
+	}
+
+	/* If all else fails, use argv[0] as-is and hope for the best */
+	if (!path)
+	{
+		/* make it absolute, if needed */
+		os_getcwd(L);
+		lua_pushstring(L, "/");
+		lua_pushstring(L, argv0);
+		
+		if (!path_isabsolute(L)) {
+			lua_concat(L, 3);
+		}
+		else {
+			lua_pop(L, 1);
+		}
+		
+		path = lua_tostring(L, -1);
+	}
+
+	lua_pushstring(L, path);
+	return 1;
 }
 
 
@@ -110,7 +203,7 @@ int main(int argc, const char** argv)
 int process_arguments(lua_State* L, int argc, const char** argv)
 {
 	int i;
-	
+
 	/* Create empty lists for Options and Args */
 	lua_newtable(L);
 	lua_newtable(L);
@@ -190,7 +283,7 @@ int process_option(lua_State* L, const char* arg)
 
 
 
-#if defined(_DEBUG)
+#if !defined(NDEBUG)
 /**
  * When running in debug mode, the scripts are loaded from the disk. The path to
  * the scripts must be provided via either the /scripts command line option or
@@ -199,7 +292,7 @@ int process_option(lua_State* L, const char* arg)
 int load_builtin_scripts(lua_State* L)
 {
 	const char* filename;
-	
+
 	/* call os.pathsearch() to locate _premake_main.lua */
 	lua_pushcfunction(L, os_pathsearch);
 	lua_pushstring(L, "_premake_main.lua");
@@ -209,7 +302,7 @@ int load_builtin_scripts(lua_State* L)
 
 	if (lua_isnil(L, -1))
 	{
-		printf(ERROR_MESSAGE, 
+		printf(ERROR_MESSAGE,
 			"Unable to find _premake_main.lua; use /scripts option when in debug mode!\n"
 			"Please refer to the documentation (or build in release mode instead)."
 		);
@@ -225,10 +318,14 @@ int load_builtin_scripts(lua_State* L)
 		return !OKAY;
 	}
 
+	/* in debug mode, show full traceback on all errors */
+	lua_getglobal(L, "debug");
+	lua_getfield(L, -1, "traceback");
+
 	/* hand off control to the scripts */
 	lua_getglobal(L, "_premake_main");
 	lua_pushstring(L, scripts_path);
-	if (lua_pcall(L, 1, 1, 0) != OKAY)
+	if (lua_pcall(L, 1, 1, -3) != OKAY)
 	{
 		printf(ERROR_MESSAGE, lua_tostring(L, -1));
 		return !OKAY;

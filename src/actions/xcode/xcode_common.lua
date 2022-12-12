@@ -1,7 +1,7 @@
 --
 -- xcode_common.lua
 -- Functions to generate the different sections of an Xcode project.
--- Copyright (c) 2009-2010 Jason Perkins and the Premake project
+-- Copyright (c) 2009-2011 Jason Perkins and the Premake project
 --
 
 	local xcode = premake.xcode
@@ -325,8 +325,15 @@
 						src = "absolute"
 					else
 						-- something else; probably a source code file
-						pth = tree.getlocalpath(node)
 						src = "group"
+
+						-- if the parent node is virtual, it won't have a local path
+						-- of its own; need to use full relative path from project
+						if node.parent.isvpath then
+							pth = node.cfg.name
+						else
+							pth = tree.getlocalpath(node)
+						end
 					end
 					
 					_p(2,'%s /* %s */ = {isa = PBXFileReference; lastKnownFileType = %s; name = "%s"; path = "%s"; sourceTree = "<%s>"; };',
@@ -397,7 +404,7 @@
 					_p(3,'name = Products;')
 				else
 					_p(3,'name = "%s";', node.name)
-					if node.path then
+					if node.path and not node.isvpath then
 						local p = node.path
 						if node.parent.path then
 							p = path.getrelative(node.parent.path, node.path)
@@ -474,7 +481,7 @@
 		_p(2,'08FB7793FE84155DC02AAC07 /* Project object */ = {')
 		_p(3,'isa = PBXProject;')
 		_p(3,'buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "%s" */;', tr.name)
-		_p(3,'compatibilityVersion = "Xcode 3.1";')
+		_p(3,'compatibilityVersion = "Xcode 3.2";')
 		_p(3,'hasScannedForEncodings = 1;')
 		_p(3,'mainGroup = %s /* %s */;', tr.id, tr.name)
 		_p(3,'projectDirPath = "";')
@@ -676,6 +683,12 @@
 			_p(4,'EXECUTABLE_PREFIX = %s;', cfg.buildtarget.prefix)
 		end
 		
+		if cfg.targetextension then
+			local ext = cfg.targetextension
+			ext = iif(ext:startswith("."), ext:sub(2), ext)
+			_p(4,'EXECUTABLE_EXTENSION = %s;', ext)
+		end
+
 		local outdir = path.getdirectory(cfg.buildtarget.bundlepath)
 		if outdir ~= "." then
 			_p(4,'CONFIGURATION_BUILD_DIR = %s;', outdir)
@@ -685,7 +698,7 @@
 		_p(4,'GCC_MODEL_TUNING = G5;')
 
 		if tr.infoplist then
-			_p(4,'INFOPLIST_FILE = "%s";', tr.infoplist.path)
+			_p(4,'INFOPLIST_FILE = "%s";', tr.infoplist.cfg.name)
 		end
 
 		installpaths = {
@@ -741,7 +754,7 @@
 			_p(4,'GCC_ENABLE_CPP_RTTI = NO;')
 		end
 		
-		if cfg.flags.Symbols and not cfg.flags.NoEditAndContinue then
+		if _ACTION ~= "xcode4" and cfg.flags.Symbols and not cfg.flags.NoEditAndContinue then
 			_p(4,'GCC_ENABLE_FIX_AND_CONTINUE = YES;')
 		end
 		
@@ -806,8 +819,6 @@
 		end
 		flags = table.join(flags, cfg.linkoptions)
 		xcode.printlist(flags, 'OTHER_LDFLAGS')
-		
-		_p(4,'PREBINDING = NO;')
 		
 		if cfg.flags.StaticRuntime then
 			_p(4,'STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;')

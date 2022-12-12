@@ -1,10 +1,11 @@
 /**
  * \file   os_getversioninfo.c
  * \brief  Retrieve operating system version information.
- * \author Copyright (c) 2011 Jason Perkins and the Premake project
+ * \author Copyright (c) 2011-2012 Jason Perkins and the Premake project
  */
 
 #include "premake.h"
+#include <stdlib.h>
 
 struct OsVersionInfo
 {
@@ -12,13 +13,15 @@ struct OsVersionInfo
 	int minorversion;
 	int revision;
 	const char* description;
-} ;
+	int isalloc;
+};
 
 static void getversion(struct OsVersionInfo* info);
 
+
 int os_getversion(lua_State* L)
 {
-	struct OsVersionInfo info;
+	struct OsVersionInfo info = {0};
 	getversion(&info);
 
 	lua_newtable(L);
@@ -26,7 +29,7 @@ int os_getversion(lua_State* L)
 	lua_pushstring(L, "majorversion");
 	lua_pushnumber(L, info.majorversion);
 	lua_settable(L, -3);
-	
+
 	lua_pushstring(L, "minorversion");
 	lua_pushnumber(L, info.minorversion);
 	lua_settable(L, -3);
@@ -39,6 +42,10 @@ int os_getversion(lua_State* L)
 	lua_pushstring(L, info.description);
 	lua_settable(L, -3);
 
+	if (info.isalloc) {
+		free((void*)info.description);
+	}
+
 	return 1;
 }
 
@@ -50,10 +57,25 @@ int os_getversion(lua_State* L)
 #define VER_SUITE_WH_SERVER   (0x00008000)
 #endif
 
+#ifndef SM_SERVERR2
+#	define SM_SERVERR2 89
+#endif
+
+SYSTEM_INFO getsysteminfo()
+{
+	typedef void (WINAPI *GetNativeSystemInfoSig)(LPSYSTEM_INFO);
+	GetNativeSystemInfoSig nativeSystemInfo = (GetNativeSystemInfoSig)
+	GetProcAddress(GetModuleHandle(TEXT("kernel32")), "GetNativeSystemInfo");
+
+	SYSTEM_INFO systemInfo = {{0}};
+	if ( nativeSystemInfo ) nativeSystemInfo(&systemInfo);
+	else GetSystemInfo(&systemInfo);
+	return systemInfo;
+}
+
 void getversion(struct OsVersionInfo* info)
 {
 	OSVERSIONINFOEX versionInfo = {0};
-	SYSTEM_INFO systemInfo = {0};
 
 	versionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 	GetVersionEx((OSVERSIONINFO*)&versionInfo);
@@ -62,8 +84,6 @@ void getversion(struct OsVersionInfo* info)
 	info->minorversion = versionInfo.dwMinorVersion;
 	info->revision = versionInfo.wServicePackMajor;
 
-	GetSystemInfo(&systemInfo);
-	
 	if (versionInfo.dwMajorVersion == 5 && versionInfo.dwMinorVersion == 0)
 	{
 		info->description = "Windows 2000";
@@ -74,6 +94,7 @@ void getversion(struct OsVersionInfo* info)
 	}
 	else if (versionInfo.dwMajorVersion == 5 && versionInfo.dwMinorVersion == 2)
 	{
+		SYSTEM_INFO systemInfo = getsysteminfo();
 		if (versionInfo.wProductType == VER_NT_WORKSTATION &&
 			systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
 		{
@@ -109,7 +130,7 @@ void getversion(struct OsVersionInfo* info)
 		{
 			info->description = "Windows Server 2008 R2";
 		}
-		else 
+		else
 		{
 			info->description = "Windows 7";
 		}
@@ -127,11 +148,16 @@ void getversion(struct OsVersionInfo* info)
 #include <CoreServices/CoreServices.h>
 
 void getversion(struct OsVersionInfo* info)
-{	
-	Gestalt(gestaltSystemVersionMajor, &info->majorversion);
-	Gestalt(gestaltSystemVersionMinor, &info->minorversion);
-	Gestalt(gestaltSystemVersionBugFix, &info->revision);	
-	
+{
+	SInt32 majorversion, minorversion, bugfix;
+	Gestalt(gestaltSystemVersionMajor, &majorversion);
+	Gestalt(gestaltSystemVersionMinor, &minorversion);
+	Gestalt(gestaltSystemVersionBugFix, &bugfix);
+
+	info->majorversion = majorversion;
+	info->minorversion = minorversion;
+	info->revision = bugfix;
+
 	info->description = "Mac OS X";
 	if (info->majorversion == 10)
 	{
@@ -149,6 +175,53 @@ void getversion(struct OsVersionInfo* info)
 		case 7:
 			info->description = "Mac OS X Lion";
 			break;
+		}
+	}
+}
+
+/*************************************************************/
+
+#elif defined(PLATFORM_BSD) || defined(PLATFORM_LINUX) || defined(PLATFORM_SOLARIS)
+
+#include <string.h>
+#include <sys/utsname.h>
+
+void getversion(struct OsVersionInfo* info)
+{
+	struct utsname u;
+	char* ver;
+
+	info->majorversion = 0;
+	info->minorversion = 0;
+	info->revision = 0;
+
+	if (uname(&u))
+	{
+		// error
+		info->description = PLATFORM_STRING;
+		return;
+	}
+
+#if __GLIBC__
+	// When using glibc, info->description gets set to u.sysname,
+	// but it isn't passed out of this function, so we need to copy 
+	// the string.
+	info->description = malloc(strlen(u.sysname) + 1);
+	strcpy((char*)info->description, u.sysname);
+	info->isalloc = 1;
+#else
+	info->description = u.sysname;
+#endif
+
+	if ((ver = strtok(u.release, ".-")) != NULL)
+	{
+		info->majorversion = atoi(ver);
+		// continue parsing from the previous position
+		if ((ver = strtok(NULL, ".-")) != NULL)
+		{
+			info->minorversion = atoi(ver);
+			if ((ver = strtok(NULL, ".-")) != NULL)
+				info->revision = atoi(ver);
 		}
 	}
 }

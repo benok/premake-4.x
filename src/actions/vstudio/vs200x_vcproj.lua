@@ -90,7 +90,7 @@
 		_p(3,'ConfigurationType="%s"', cfgtype)
 
 		if (cfg.flags.MFC) then
-			_p(3, 'UseOfMFC="2"')			
+			_p(3, 'UseOfMFC="%d"', iif(cfg.flags.StaticRuntime, 1, 2))
 		end				  
 		_p(3,'CharacterSet="%s"', iif(cfg.flags.Unicode, 1, 2))
 		if cfg.flags.Managed then
@@ -122,8 +122,10 @@
 
 			-- source files are handled at the leaves
 			onleaf = function(node, depth)
+				local fname = node.cfg.name
+				
 				_p(depth, '<File')
-				_p(depth, '\tRelativePath="%s"', path.translate(node.path, "\\"))
+				_p(depth, '\tRelativePath="%s"', path.translate(fname, "\\"))
 				_p(depth, '\t>')
 				depth = depth + 1
 
@@ -133,22 +135,34 @@
 					if cfginfo.isreal then
 						local cfg = premake.getconfig(prj, cfginfo.src_buildcfg, cfginfo.src_platform)
 						
-						local usePCH = (not prj.flags.NoPCH and prj.pchsource == node.path)
-						if (usePCH) then
+						local usePCH = (not prj.flags.NoPCH and prj.pchsource == node.cfg.name)
+						local isSourceCode = path.iscppfile(fname)
+						local needsCompileAs = (path.iscfile(fname) ~= premake.project.iscproject(prj))
+						
+						if usePCH or (isSourceCode and needsCompileAs) then
 							_p(depth, '<FileConfiguration')
 							_p(depth, '\tName="%s"', cfginfo.name)
 							_p(depth, '\t>')
 							_p(depth, '\t<Tool')
-							_p(depth, '\t\tName="%s"', iif(cfg.system == "Xbox360", "VCCLX360CompilerTool", "VCCLCompilerTool"))
-
-			                if cfg.system == "PS3" then
-			                    local options = table.join(premake.snc.getcflags(cfg), premake.snc.getcxxflags(cfg), cfg.buildoptions)
-		                        options = table.concat(options, " ");
-			                    options = options .. ' --create_pch="$(IntDir)/$(TargetName).pch"'			                    
-			                    _p(depth, '\t\tAdditionalOptions="%s"', premake.esc(options))
-			                else
-			                    _p(depth, '\t\tUsePrecompiledHeader="1"')
-			                end
+							_p(depth, '\t\tName="%s"', iif(cfg.system == "Xbox360", 
+							                                 "VCCLX360CompilerTool", 
+							                                 "VCCLCompilerTool"))
+							if needsCompileAs then
+								_p(depth, '\t\tCompileAs="%s"', iif(path.iscfile(fname), 1, 2))
+							end
+							
+							if usePCH then
+								if cfg.system == "PS3" then
+									local options = table.join(premake.snc.getcflags(cfg), 
+									                           premake.snc.getcxxflags(cfg), 
+									                           cfg.buildoptions)
+									options = table.concat(options, " ");
+									options = options .. ' --create_pch="$(IntDir)/$(TargetName).pch"'			                    
+									_p(depth, '\t\tAdditionalOptions="%s"', premake.esc(options))
+								else
+									_p(depth, '\t\tUsePrecompiledHeader="1"')
+								end
+							end
 
 							_p(depth, '\t/>')
 							_p(depth, '</FileConfiguration>')

@@ -44,7 +44,7 @@
 	end
 	
 	local function prepare()
-		premake.buildconfigs()
+		premake.bake.buildconfigs()
 		premake.action.call("clean")		
 	end
 
@@ -106,7 +106,6 @@
 		language "C++"
 		kind "ConsoleApp"
 		prepare()
-		test.contains(removed, "obj")
 		test.contains(removed, "obj/Debug")
 		test.contains(removed, "obj/Release")
 	end

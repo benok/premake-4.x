@@ -25,7 +25,7 @@
 	end
 
 	local function prepare()
-		premake.buildconfigs()
+		premake.bake.buildconfigs()
 	end
 	
 
@@ -47,16 +47,16 @@ ifndef verbose
   SILENT = @
 endif
 
-ifndef CC
-  CC = gcc
-endif
+CC = gcc
+CXX = g++
+AR = ar
 
-ifndef CXX
-  CXX = g++
-endif
-
-ifndef AR
-  AR = ar
+ifndef RESCOMP
+  ifdef WINDRES
+    RESCOMP = $(WINDRES)
+  else
+    RESCOMP = windres
+  endif
 endif
 		]]
 	end
@@ -82,10 +82,10 @@ ifeq ($(config),debug)
   CFLAGS    += $(CPPFLAGS) $(ARCH) 
   CXXFLAGS  += $(CFLAGS) 
   LDFLAGS   += -s
-  LIBS      += 
   RESFLAGS  += $(DEFINES) $(INCLUDES) 
+  LIBS      += 
   LDDEPS    += 
-  LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(ARCH) $(LIBS)
+  LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(LIBS) $(LDFLAGS)
   define PREBUILDCMDS
   endef
   define PRELINKCMDS
@@ -116,10 +116,10 @@ ifeq ($(config),debugps3)
   CFLAGS    += $(CPPFLAGS) $(ARCH) 
   CXXFLAGS  += $(CFLAGS) 
   LDFLAGS   += -s
-  LIBS      += 
   RESFLAGS  += $(DEFINES) $(INCLUDES) 
+  LIBS      += 
   LDDEPS    += 
-  LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(ARCH) $(LIBS)
+  LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(LIBS) $(LDFLAGS)
   define PREBUILDCMDS
   endef
   define PRELINKCMDS
@@ -147,10 +147,10 @@ ifeq ($(config),debug64)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -m64
   CXXFLAGS  += $(CFLAGS) 
   LDFLAGS   += -s -m64 -L/usr/lib64
-  LIBS      += 
   RESFLAGS  += $(DEFINES) $(INCLUDES) 
+  LIBS      += 
   LDDEPS    += 
-  LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(ARCH) $(LIBS)
+  LINKCMD    = $(CXX) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(LIBS) $(LDFLAGS)
   define PREBUILDCMDS
   endef
   define PRELINKCMDS
@@ -179,8 +179,8 @@ ifeq ($(config),debuguniv32)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -arch i386 -arch ppc
   CXXFLAGS  += $(CFLAGS) 
   LDFLAGS   += -s -arch i386 -arch ppc
-  LIBS      += 
   RESFLAGS  += $(DEFINES) $(INCLUDES) 
+  LIBS      += 
   LDDEPS    += 
   LINKCMD    = libtool -o $(TARGET) $(OBJECTS)
   define PREBUILDCMDS

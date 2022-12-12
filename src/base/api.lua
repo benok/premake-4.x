@@ -60,6 +60,12 @@
 			scope = "config",
 		},
 
+		debugenvs  = 
+		{
+			kind = "list",
+			scope = "config",
+		},
+		
 		defines =
 		{
 			kind  = "list",
@@ -91,37 +97,58 @@
 			scope = "config",
 			isflags = true,
 			usagecopy = true,
-			allowed = {
-				"EnableSSE",
-				"EnableSSE2",
-				"ExtraWarnings",
-				"FatalWarnings",
-				"FloatFast",
-				"FloatStrict",
-				"Managed",
-				"MFC",
-				"NativeWChar",
-				"No64BitChecks",
-				"NoEditAndContinue",
-				"NoExceptions",
-				"NoFramePointer",
-				"NoImportLib",
-				"NoIncrementalLink",
-				"NoManifest",
-				"NoMinimalRebuild",
-				"NoNativeWChar",
-				"NoPCH",
-				"NoRTTI",
-				"Optimize",
-				"OptimizeSize",
-				"OptimizeSpeed",
-				"SEH",
-				"StaticRuntime",
-				"Symbols",
-				"Unicode",
-				"Unsafe",
-				"WinMain"
-			},
+			allowed = function(value)
+			
+				local allowed_flags = {
+					DebugEnvsDontMerge = 1,
+					DebugEnvsInherit = 1,
+					EnableSSE = 1,
+					EnableSSE2 = 1,
+					ExtraWarnings = 1,
+					FatalWarnings = 1,
+					FloatFast = 1,
+					FloatStrict = 1,
+					Managed = 1,
+					MFC = 1,
+					NativeWChar = 1,
+					No64BitChecks = 1,
+					NoEditAndContinue = 1,
+					NoExceptions = 1,
+					NoFramePointer = 1,
+					NoImportLib = 1,
+					NoIncrementalLink = 1,
+					NoManifest = 1,
+					NoMinimalRebuild = 1,
+					NoNativeWChar = 1,
+					NoPCH = 1,
+					NoRTTI = 1,
+					Optimize = 1,
+					OptimizeSize = 1,
+					OptimizeSpeed = 1,
+					SEH = 1,
+					StaticRuntime = 1,
+					Symbols = 1,
+					Unicode = 1,
+					Unsafe = 1,
+					WinMain = 1
+				}
+				
+				local englishToAmericanSpelling =
+				{
+					optimise = 'optimize',
+					optimisesize = 'optimizesize',
+					optimisespeed = 'optimizespeed',				
+				}
+
+				local lowervalue = value:lower()
+				lowervalue = englishToAmericanSpelling[lowervalue] or lowervalue
+				for v, _ in pairs(allowed_flags) do
+					if v:lower() == lowervalue then
+						return v
+					end				
+				end
+				return nil, "invalid flag"
+			end,
 		},
 		
 		framework =
@@ -241,6 +268,12 @@
 		{
 			kind  = "path",
 			scope = "container",
+		},
+		
+		makesettings =
+		{
+			kind = "list",
+			scope = "config",
 		},
 		
 		objdir =
@@ -367,6 +400,13 @@
 			kind  = "list",
 			scope = "config",
 		},
+		
+		vpaths = 
+		{
+			kind = "keypath",
+			scope = "container",
+		},
+
 	}
 
 
@@ -440,8 +480,8 @@
 		
 		return container, msg
 	end
-	
-	
+
+
 	
 --
 -- Adds values to an array field of a solution/project/configuration. `ctype`
@@ -519,6 +559,37 @@
 	end
 	
 	
+--
+-- Adds values to a key-value field of a solution/project/configuration. `ctype`
+-- specifies the container type (see premake.getobject) for the field.
+--
+
+	function premake.setkeyvalue(ctype, fieldname, values)
+		local container, err = premake.getobject(ctype)
+		if not container then
+			error(err, 4)
+		end
+		
+		if not container[fieldname] then
+			container[fieldname] = {}
+		end
+
+		if type(values) ~= "table" then
+			error("invalid value; table expected", 4)
+		end
+		
+		local field = container[fieldname]
+		
+		for key,value in pairs(values) do
+			if not field[key] then
+				field[key] = {}
+			end
+			table.insertflat(field[key], value)
+		end
+
+		return field
+	end
+
 	
 --
 -- Set a new value for a string field of a solution/project/configuration. `ctype`
@@ -556,23 +627,25 @@
 		local scope   = premake.fields[name].scope
 		local allowed = premake.fields[name].allowed
 		
-		if ((kind == "string" or kind == "path") and value) then
+		if (kind == "string" or kind == "path") and value then
 			if type(value) ~= "string" then
 				error("string value expected", 3)
 			end
 		end
 		
-		if (kind == "string") then
+		if kind == "string" then
 			return premake.setstring(scope, name, value, allowed)
-		elseif (kind == "path") then
+		elseif kind == "path" then
 			if value then value = path.getabsolute(value) end
 			return premake.setstring(scope, name, value)
-		elseif (kind == "list") then
+		elseif kind == "list" then
 			return premake.setarray(scope, name, value, allowed)
-		elseif (kind == "dirlist") then
+		elseif kind == "dirlist" then
 			return premake.setdirarray(scope, name, value)
-		elseif (kind == "filelist") then
+		elseif kind == "filelist" then
 			return premake.setfilearray(scope, name, value)
+		elseif kind == "keyvalue" or kind == "keypath" then
+			return premake.setkeyvalue(scope, name, value)
 		end
 	end
 

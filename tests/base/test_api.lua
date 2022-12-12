@@ -1,7 +1,7 @@
 --
 -- tests/base/test_api.lua
 -- Automated test suite for the project API support functions.
--- Copyright (c) 2008-2010 Jason Perkins and the Premake project
+-- Copyright (c) 2008-2011 Jason Perkins and the Premake project
 --
 
 	T.api = { }
@@ -117,6 +117,49 @@
 		premake.CurrentConfiguration = { }
 		premake.setstring("config", "myfield", "better", { "Good", "Better", "Best" })
 		test.isequal("Better", premake.CurrentConfiguration.myfield)
+	end
+
+
+--
+-- premake.setkeyvalue() tests
+--
+
+	function suite.setkeyvalue_Inserts_OnStringValue()
+		premake.CurrentConfiguration = { }
+		premake.setkeyvalue("config", "vpaths", { ["Headers"] = "*.h" })
+		test.isequal({"*.h"}, premake.CurrentConfiguration.vpaths["Headers"])
+	end
+	
+	function suite.setkeyvalue_Inserts_OnTableValue()
+		premake.CurrentConfiguration = { }
+		premake.setkeyvalue("config", "vpaths", { ["Headers"] = {"*.h","*.hpp"} })
+		test.isequal({"*.h","*.hpp"}, premake.CurrentConfiguration.vpaths["Headers"])
+	end
+	
+	function suite.setkeyvalue_Inserts_OnEmptyStringKey()
+		premake.CurrentConfiguration = { }
+		premake.setkeyvalue("config", "vpaths", { [""] = "src" })
+		test.isequal({"src"}, premake.CurrentConfiguration.vpaths[""])
+	end
+	
+	function suite.setkeyvalue_RaisesError_OnString()
+		premake.CurrentConfiguration = { }
+		ok, err = pcall(function () premake.setkeyvalue("config", "vpaths", "Headers") end)
+		test.isfalse(ok)
+	end
+	
+	function suite.setkeyvalue_InsertsString_IntoExistingKey()
+		premake.CurrentConfiguration = { }
+		premake.setkeyvalue("config", "vpaths", { ["Headers"] = "*.h" })
+		premake.setkeyvalue("config", "vpaths", { ["Headers"] = "*.hpp" })
+		test.isequal({"*.h","*.hpp"}, premake.CurrentConfiguration.vpaths["Headers"])
+	end
+	
+	function suite.setkeyvalue_InsertsTable_IntoExistingKey()
+		premake.CurrentConfiguration = { }
+		premake.setkeyvalue("config", "vpaths", { ["Headers"] = {"*.h"} })
+		premake.setkeyvalue("config", "vpaths", { ["Headers"] = {"*.hpp"} })
+		test.isequal({"*.h","*.hpp"}, premake.CurrentConfiguration.vpaths["Headers"])
 	end
 
 
@@ -341,3 +384,21 @@
 		uuid "7CBB5FC2-7449-497f-947F-129C5129B1FB"
 		test.isequal(premake.CurrentContainer.uuid, "7CBB5FC2-7449-497F-947F-129C5129B1FB")
 	end
+
+
+--
+-- Fields with allowed value lists should be case-insensitive.
+--
+
+	function suite.flags_onCaseMismatch()
+		premake.CurrentConfiguration = {}
+		flags "symbols"
+		test.isequal(premake.CurrentConfiguration.flags[1], "Symbols")
+	end
+
+	function suite.flags_onCaseMismatchAndAlias()
+		premake.CurrentConfiguration = {}
+		flags "optimisespeed"
+		test.isequal(premake.CurrentConfiguration.flags[1], "OptimizeSpeed")
+	end
+		
