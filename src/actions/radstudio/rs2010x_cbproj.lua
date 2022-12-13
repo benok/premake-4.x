@@ -252,7 +252,7 @@
 				end
 				
 				if #cfg.libdirs > 0 then
-					_p(2,'<ILINK_LibraryPath>%s;$(ILINK_LibraryPath)</ILINK_LibraryPath>', table.concat(premake.esc(path.translate(cfg.libdirs, '\\')) , ";"))
+					_p(2,'<ILINK_LibraryPath>%s;$(ILINK_LibraryPath)</ILINK_LibraryPath>', premake.esc(path.translate(table.concat(cfg.libdirs, ';'), '\\')))
 				end
 				
 				if #cfg.defines > 0 then
