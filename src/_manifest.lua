@@ -28,6 +28,7 @@
 		"tools/dotnet.lua",
 		"tools/gcc.lua",
 		"tools/msc.lua",
+		"tools/bcc.lua",
 		"tools/ow.lua",
 		"tools/snc.lua",
 		"base/validate.lua",
