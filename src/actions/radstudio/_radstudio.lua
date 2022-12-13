@@ -1,14 +1,13 @@
 --
 -- _radstudio.lua
--- Define the RAD Studio 2010-XE* actions.
--- Copyright (c) 2008-2011 Jason Perkins and the Premake project
+-- Define the RAD Studio 2010-XE3 ,10.x, 11 actions.
+-- Copyright (c) 2008-2022 Jason Perkins and the Premake project
 --
 
 --TODO
 -- * Support "Native" platform
 -- * Support vpath
 -- * Fix fails to save groupproj(?) when location is specified.
--- * remove *.local on 'clean' action
 
 
 	premake.radstudio = { }
@@ -18,7 +17,13 @@
 	premake.radstudio.rsxe = { }
 	premake.radstudio.rsxe2 = { }
 	premake.radstudio.rsxe3 = { }
-	
+	premake.radstudio.rs100 = { }  -- 10 Seattle
+	premake.radstudio.rs101 = { }  -- 10.1 Berlin
+	premake.radstudio.rs102 = { }  -- 10.2 Tokyo
+	premake.radstudio.rs103 = { }  -- 10.3 Rio
+	premake.radstudio.rs104 = { }  -- 10.4 Sydney
+	premake.radstudio.rs110 = { }  -- 11 Alexandria
+
 --
 -- Map Premake platform identifiers to the RAD Studio versions.
 --
@@ -53,6 +58,60 @@
 	}
 
 	radstudio.rsxe3.platforms = { 
+		Native  = "Win32",
+		_Base   = "Base",		-- used for base config
+		x32     = "Win32", 
+		x64     = "Win64",
+		Universal32	= "OSX32",
+		Universal64	= "OSX64",
+	}
+
+	radstudio.rs100.platforms = { 
+		Native  = "Win32",
+		_Base   = "Base",		-- used for base config
+		x32     = "Win32", 
+		x64     = "Win64",
+		Universal32	= "OSX32",
+		Universal64	= "OSX64",
+	}
+
+	radstudio.rs101.platforms = { 
+		Native  = "Win32",
+		_Base   = "Base",		-- used for base config
+		x32     = "Win32", 
+		x64     = "Win64",
+		Universal32	= "OSX32",
+		Universal64	= "OSX64",
+	}
+
+	radstudio.rs102.platforms = { 
+		Native  = "Win32",
+		_Base   = "Base",		-- used for base config
+		x32     = "Win32", 
+		x64     = "Win64",
+		Universal32	= "OSX32",
+		Universal64	= "OSX64",
+	}
+
+	radstudio.rs103.platforms = { 
+		Native  = "Win32",
+		_Base   = "Base",		-- used for base config
+		x32     = "Win32", 
+		x64     = "Win64",
+		Universal32	= "OSX32",
+		Universal64	= "OSX64",
+	}
+
+	radstudio.rs104.platforms = { 
+		Native  = "Win32",
+		_Base   = "Base",		-- used for base config
+		x32     = "Win32", 
+		x64     = "Win64",
+		Universal32	= "OSX32",
+		Universal64	= "OSX64",
+	}
+
+	radstudio.rs110.platforms = { 
 		Native  = "Win32",
 		_Base   = "Base",		-- used for base config
 		x32     = "Win32", 
@@ -221,6 +280,198 @@
 		oncleantarget   = premake.radstudio.cleantarget
 	}
 	
+--
+-- Register RAD Studio 10 Seattle
+--
+
+	newaction
+	{
+		trigger         = "rs100",
+		shortname       = "RAD Studio 10 Seattle",
+		description     = "Generate Embarcadero RAD Studio 10 Seattle project files",
+		os              = "windows",
+
+		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
+
+		valid_languages = { "C", "C++" },
+
+		valid_tools     = {
+			cc     = { "bcc" },
+		},
+
+		onsolution = function(sln)
+			premake.generate(sln, "%%.groupproj", radstudio.gproj2010.generate)
+		end,
+
+		onproject = function(prj)
+			premake.generate(prj, "%%.cbproj", premake.radstudio.rs2010x.generate)
+		end,
+
+		oncleansolution = premake.radstudio.cleansolution,
+		oncleanproject  = premake.radstudio.cleanproject,
+		oncleantarget   = premake.radstudio.cleantarget
+	}
+
+--
+-- Register RAD Studio 10.1 Berlin
+--
+
+	newaction
+	{
+		trigger         = "rs101",
+		shortname       = "RAD Studio 10.1 Berlin",
+		description     = "Generate Embarcadero RAD Studio 10.1 Berlin project files",
+		os              = "windows",
+
+		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
+
+		valid_languages = { "C", "C++" },
+
+		valid_tools     = {
+			cc     = { "bcc" },
+		},
+
+		onsolution = function(sln)
+			premake.generate(sln, "%%.groupproj", radstudio.gproj2010.generate)
+		end,
+
+		onproject = function(prj)
+			premake.generate(prj, "%%.cbproj", premake.radstudio.rs2010x.generate)
+		end,
+
+		oncleansolution = premake.radstudio.cleansolution,
+		oncleanproject  = premake.radstudio.cleanproject,
+		oncleantarget   = premake.radstudio.cleantarget
+	}
+
+--
+-- Register RAD Studio 10.2 Tokyo
+--
+
+	newaction
+	{
+		trigger         = "rs102",
+		shortname       = "RAD Studio 10.2 Tokyo",
+		description     = "Generate Embarcadero RAD Studio 10.2 Tokyo project files",
+		os              = "windows",
+
+		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
+
+		valid_languages = { "C", "C++" },
+
+		valid_tools     = {
+			cc     = { "bcc" },
+		},
+
+		onsolution = function(sln)
+			premake.generate(sln, "%%.groupproj", radstudio.gproj2010.generate)
+		end,
+
+		onproject = function(prj)
+			premake.generate(prj, "%%.cbproj", premake.radstudio.rs2010x.generate)
+		end,
+
+		oncleansolution = premake.radstudio.cleansolution,
+		oncleanproject  = premake.radstudio.cleanproject,
+		oncleantarget   = premake.radstudio.cleantarget
+	}
+
+--
+-- Register RAD Studio 10.3 Rio
+--
+
+	newaction
+	{
+		trigger         = "rs103",
+		shortname       = "RAD Studio 10.3 Rio",
+		description     = "Generate Embarcadero RAD Studio 10.3 Rio project files",
+		os              = "windows",
+
+		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
+
+		valid_languages = { "C", "C++" },
+
+		valid_tools     = {
+			cc     = { "bcc" },
+		},
+
+		onsolution = function(sln)
+			premake.generate(sln, "%%.groupproj", radstudio.gproj2010.generate)
+		end,
+
+		onproject = function(prj)
+			premake.generate(prj, "%%.cbproj", premake.radstudio.rs2010x.generate)
+		end,
+
+		oncleansolution = premake.radstudio.cleansolution,
+		oncleanproject  = premake.radstudio.cleanproject,
+		oncleantarget   = premake.radstudio.cleantarget
+	}
+
+--
+-- Register RAD Studio 10.4 Sydney
+--
+
+	newaction
+	{
+		trigger         = "rs104",
+		shortname       = "RAD Studio 10.4 Sydney",
+		description     = "Generate Embarcadero RAD Studio 10.4 Sydney project files",
+		os              = "windows",
+
+		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
+
+		valid_languages = { "C", "C++" },
+
+		valid_tools     = {
+			cc     = { "bcc" },
+		},
+
+		onsolution = function(sln)
+			premake.generate(sln, "%%.groupproj", radstudio.gproj2010.generate)
+		end,
+
+		onproject = function(prj)
+			premake.generate(prj, "%%.cbproj", premake.radstudio.rs2010x.generate)
+		end,
+
+		oncleansolution = premake.radstudio.cleansolution,
+		oncleanproject  = premake.radstudio.cleanproject,
+		oncleantarget   = premake.radstudio.cleantarget
+	}
+
+--
+-- Register RAD Studio 11 Alexandria
+--
+
+	newaction
+	{
+		trigger         = "rs110",
+		shortname       = "RAD Studio 11 Alexandria",
+		description     = "Generate Embarcadero RAD Studio 11 Alexandria project files",
+		os              = "windows",
+
+		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
+
+		valid_languages = { "C", "C++" },
+
+		valid_tools     = {
+			cc     = { "bcc" },
+		},
+
+		onsolution = function(sln)
+			premake.generate(sln, "%%.groupproj", radstudio.gproj2010.generate)
+		end,
+
+		onproject = function(prj)
+			premake.generate(prj, "%%.cbproj", premake.radstudio.rs2010x.generate)
+		end,
+
+		oncleansolution = premake.radstudio.cleansolution,
+		oncleanproject  = premake.radstudio.cleanproject,
+		oncleantarget   = premake.radstudio.cleantarget
+	}
+
 --
 -- Assemble the project file name.
 --

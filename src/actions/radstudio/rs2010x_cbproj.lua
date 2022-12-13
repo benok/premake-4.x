@@ -36,7 +36,8 @@
 --
 -- Returns the project file version
 --
-	
+-- http://owlsperspective.blogspot.com/p/delphi-versions.html
+
 	function rs2010x.project_version()
 		if _ACTION == "rs2010" then
 			return "12.0"
@@ -46,6 +47,18 @@
 			return "13.4"
 		elseif _ACTION == "rsxe3" then
 			return "14.3"
+		elseif _ACTION == "rs100" then
+			return "18.0" -- 10 Seattle RTM
+		elseif _ACTION == "rs101" then
+			return "18.1" -- 10.1 Berlin RTM
+		elseif _ACTION == "rs102" then
+			return "18.2" -- 10.2 Tokyo RTM
+		elseif _ACTION == "rs103" then
+			return "18.5" -- 10.3 Rio RTM
+		elseif _ACTION == "rs104" then
+			return "19.0" -- 10.4 Sydney RTM
+		elseif _ACTION == "rs110" then
+			return "19.3" -- 11 Alexandria RTM
 		end
 	end
 
@@ -57,19 +70,19 @@
 	end
 
 	function rs2010x.supports_multiple_platform()
-		return not((_ACTION <= "rs2010") or (_ACTION == "rsxe"))
+		return not((_ACTION == "rs2010") or (_ACTION == "rsxe"))
 	end
 	
 	function rs2010x.listup_platforms()
-		return (not (_ACTION <= "rs2010")) and (_ACTION >= "rsxe")
+		return (not (_ACTION == "rs2010")) and ((_ACTION >= "rsxe") or (_ACTION >= "rs100"))
 	end
 
 	function rs2010x.import_first()
-		return (_ACTION <= "rs2010") or (_ACTION == "rsxe")
+		return (_ACTION == "rs2010") or (_ACTION == "rsxe")
 	end
 
 	function rs2010x.need_novcl()
-		return (_ACTION <= "rs2010") or (_ACTION == "rsxe")
+		return (_ACTION == "rs2010") or (_ACTION == "rsxe")
 	end
 	
 	local function _config_symbol(idx, platform)
@@ -246,7 +259,7 @@
 					_p(2, '<Defines>%s;$(Defines)</Defines>', table.concat(premake.esc(cfg.defines), ";"))
 				end
 
-				if (platform == 'x32') and (not cfg.flags.BccUseNewCompiler) and (#cfg.bcc_disable_warnings > 0) then
+				if (platform == 'x32') and (not cfg.flags.BccUseNewCompiler) and (#cfg.bcc_disable_warnings > 0) then	
 					for _, item in ipairs(cfg.bcc_disable_warnings) do
 						_p(2,'<BCC_%s>false</BCC_%s>', item, item)
 					end
@@ -475,6 +488,9 @@ end
 			_p(1, [[<Import Condition="Exists('$(BDS)\Bin\CodeGear.Cpp.Targets')" Project="$(BDS)\Bin\CodeGear.Cpp.Targets"/>]])
 			_p(1, [[<Import Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')" Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj"/>]])
 		elseif _ACTION >= "rsxe3" then
+			_p(1, [[<Import Project="$(BDS)\Bin\CodeGear.Cpp.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Cpp.Targets')"/>]])
+			_p(1, [[<Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>]])
+		elseif _ACTION >= "rs100" then
 			_p(1, [[<Import Project="$(BDS)\Bin\CodeGear.Cpp.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Cpp.Targets')"/>]])
 			_p(1, [[<Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>]])
 		end
