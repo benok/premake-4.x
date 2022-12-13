@@ -500,6 +500,7 @@ end
 --
 	function rs2010x.generate(prj)
 		io.eol = '\r\n'
+		io.indent = '    '
 		radstudio.write_utf8_bom()
 
  		-- filter platforms in sln and return as tables (e.g. x86 etc.)

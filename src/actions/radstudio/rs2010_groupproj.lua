@@ -15,6 +15,7 @@
 		
 		-- Mark the file as Unicode
 		io.eol = '\r\n'
+		io.indent = '    '
 		radstudio.write_utf8_bom()
 		
 		_p('<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">')
