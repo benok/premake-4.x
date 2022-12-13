@@ -140,12 +140,13 @@
 
 	function radstudio.cleansolution(sln)
 		premake.clean.file(sln, "%%.groupproj")
+		premake.clean.file(sln, "%%.groupproj.local")
 	end
 	
 	function radstudio.cleanproject(prj)
 		local fname = premake.project.getfilename(prj, "%%")
-
 		os.remove(fname .. ".cbproj")
+		os.remove(fname .. ".cbproj.local")
 	end
 
 	function radstudio.cleantarget(name)
