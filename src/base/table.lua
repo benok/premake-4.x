@@ -178,4 +178,32 @@
 		return result
 	end
 	
-		
+
+
+---
+--- (for debug) Dump table as string
+---
+	function table.dump(t)
+		if type(t) ~= "table" then
+			if type(t) == "string" then
+				return t
+			else
+				error("invalid value")	
+			end
+		end
+		local result = ""
+		for v in pairs(t) do
+			local s
+			if type(v) == "table" then
+				s = table.dump(v)
+			else
+				s = v .. '="' .. table.dump(t[v]) .. '"'
+			end
+			if result ~= "" then
+					result = result .. "," .. s
+			else
+					result = s
+			end
+		end
+		return "[" .. result .. "]"
+	end
