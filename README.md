@@ -1,4 +1,4 @@
-# Premake4.x with Embarcadero RAD Studio support
+# Premake-4.x with Embarcadero RAD Studio support
 
 ## Summary
 
@@ -9,6 +9,7 @@
 * Supports Win32/Win64 architecture only.
 * If you choose WindowedApp, generates VCL application cbproj.
 * No vpath, Native support.
+* No unit tests included.
 
 ### Supported Actions for RadStudio
 
