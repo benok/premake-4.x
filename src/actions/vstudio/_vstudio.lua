@@ -177,7 +177,7 @@
 			pattern = iif(_ACTION > "vs2008", "%%.vcxproj", "%%.vcproj")
 		end
 
-		local fname = premake.project.getbasename(prj.name, pattern)
+		local fname = premake.project.getbasename(prj, pattern)
 		fname = path.join(prj.location, fname)
 		return fname
 	end

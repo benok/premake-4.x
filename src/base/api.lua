@@ -748,7 +748,8 @@
 		end
 
 		prj.solution       = sln
-		prj.name           = name
+		prj.name           = name	
+		prj.suffix         = ''
 		prj.basedir        = os.getcwd()
 		prj.uuid           = os.uuid()
 		prj.blocks         = { }
@@ -844,6 +845,9 @@
 		return premake.CurrentContainer
 	end
 
+	function prjsuffix(name)	
+		premake.CurrentContainer.suffix = name
+	end	
 
 --
 -- Define a new action.
@@ -864,6 +868,7 @@
 --    The new option object.
 --
 
-	function newoption(opt)
+	function newoption(opt)	
+		--print('newoption' .. table.dump(opt))
 		premake.option.add(opt)
 	end

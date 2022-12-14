@@ -30,6 +30,7 @@
 		setmetatable(sln, { __type="solution" })
 
 		sln.name           = name
+		sln.suffix         = ''
 		sln.basedir        = os.getcwd()			
 		sln.uuid           = os.uuid()
 		sln.projects       = { }

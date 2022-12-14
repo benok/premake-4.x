@@ -265,8 +265,12 @@
 --    path components.
 --
 
-	function premake.project.getbasename(prjname, pattern)
-		return pattern:gsub("%%%%", prjname)
+	function premake.project.getbasename(prj, pattern)	
+		local name = prj.name	
+		if (prj.suffix ~= nil) and (prj.suffix ~= '') then
+			name = name .. '_' .. prj.suffix
+		end
+		return pattern:gsub("%%%%", name)
 	end
 
 
@@ -285,7 +289,7 @@
 --
 
 	function premake.project.getfilename(prj, pattern)
-		local fname = premake.project.getbasename(prj.name, pattern)
+		local fname = premake.project.getbasename(prj, pattern)
 		fname = path.join(prj.location, fname)
 		return path.getrelative(os.getcwd(), fname)
 	end
