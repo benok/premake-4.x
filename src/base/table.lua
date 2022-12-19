@@ -187,6 +187,8 @@
 		if type(t) ~= "table" then
 			if type(t) == "string" then
 				return t
+			elseif type(t) == "nil" then
+				return 'nil'
 			else
 				error("invalid value")	
 			end

@@ -58,19 +58,26 @@ configuration { "rs*", "x32" }
   }    
 ```
 
-### bcc_clang_options
+### bcc_clang_options, bcc_clanc_c_options, bcc_clang_cpp_options
 
 * Works with CLANG based compilers.
 * Specify additonal command line options passed to compiler.
+  * bcc_clang_c_options (applied to C project only)
+  * bcc_clang_cpp_options (applied to C++ project only)
+  * bcc_clang_options (applied to both projects)
 * See also
   * [Errors and Warnings of Clang\-enhanced C\+\+ Compilers \- RAD Studio](https://docwiki.embarcadero.com/RADStudio/Alexandria/en/Errors_and_Warnings_of_Clang-enhanced_C%2B%2B_Compilers)
 
 ```lua
 configuration { "rs*", "x64" }    
-  -- 
   bcc_clang_options {
     "-fdiagnostics-show-option",
     "-Wno-deprecated-writable-strings",
+  }
+
+configuration { "rs104", "x64" }
+  bcc_clang_cpp_options {
+    "-std=c++14"
   }
 ```
 
