@@ -270,11 +270,16 @@
 					((#cfg.bcc_clang_options > 0) or 
 					 ((prj.language == "C")   and (#cfg.bcc_clang_c_options > 0)) or 
 					 ((prj.language == "C++") and (#cfg.bcc_clang_cpp_options > 0))) then
-					
+
 					local opts = cfg.bcc_clang_options
-					if (prj.language == "C")   then opts = table.join(opts, cfg.bcc_clang_c_options) end
-					if (prj.language == "C++") then	opts = table.join(opts, cfg.bcc_clang_cpp_options) end
-					
+
+					if (prj.language == "C")   then
+						opts = table.join(opts, cfg.bcc_clang_c_options)
+					end
+					if (prj.language == "C++") then
+						opts = table.join(opts, cfg.bcc_clang_cpp_options)
+					end
+
 					_p(2,'<BCC_UserSuppliedOptions>%s</BCC_UserSuppliedOptions>', table.concat(opts, ' '))
 				end
 			end
