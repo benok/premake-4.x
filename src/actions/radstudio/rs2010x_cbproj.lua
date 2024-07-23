@@ -59,6 +59,8 @@
 			return "19.0" -- 10.4 Sydney RTM
 		elseif _ACTION == "rs110" then
 			return "19.3" -- 11 Alexandria RTM
+		elseif _ACTION == "rs120" then
+			return "20.1" -- 12 Athens RTM/Release 1
 		end
 	end
 

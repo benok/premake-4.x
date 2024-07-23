@@ -23,6 +23,7 @@
 	premake.radstudio.rs103 = { }  -- 10.3 Rio
 	premake.radstudio.rs104 = { }  -- 10.4 Sydney
 	premake.radstudio.rs110 = { }  -- 11 Alexandria
+	premake.radstudio.rs120 = { }  -- 12 Athens
 
 --
 -- Map Premake platform identifiers to the RAD Studio versions.
@@ -115,6 +116,15 @@
 		Native  = "Win32",
 		_Base   = "Base",		-- used for base config
 		x32     = "Win32", 
+		x64     = "Win64",
+		Universal32	= "OSX32",
+		Universal64	= "OSX64",
+	}
+
+	radstudio.rs120.platforms = {
+		Native  = "Win32",
+		_Base   = "Base",		-- used for base config
+		x32     = "Win32",
 		x64     = "Win64",
 		Universal32	= "OSX32",
 		Universal64	= "OSX64",
@@ -472,6 +482,38 @@
 		oncleanproject  = premake.radstudio.cleanproject,
 		oncleantarget   = premake.radstudio.cleantarget
 	}
+
+--
+-- Register RAD Studio 12 Athens
+--
+
+newaction
+{
+	trigger         = "rs120",
+	shortname       = "RAD Studio 12 Athens",
+	description     = "Generate Embarcadero RAD Studio 12 Athens project files",
+	os              = "windows",
+
+	valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
+
+	valid_languages = { "C", "C++" },
+
+	valid_tools     = {
+		cc     = { "bcc" },
+	},
+
+	onsolution = function(sln)
+		premake.generate(sln, "%%.groupproj", radstudio.gproj2010.generate)
+	end,
+
+	onproject = function(prj)
+		premake.generate(prj, "%%.cbproj", premake.radstudio.rs2010x.generate)
+	end,
+
+	oncleansolution = premake.radstudio.cleansolution,
+	oncleanproject  = premake.radstudio.cleanproject,
+	oncleantarget   = premake.radstudio.cleantarget
+}
 
 --
 -- Assemble the project file name.
