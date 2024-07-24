@@ -3,7 +3,7 @@
 ## Summary
 
 * Generates groupproj/cbproj for RAD Studio.
-* Supports RAD Studio 10-11, XE-XE3, 2010.
+* Supports RAD Studio 10-12, XE-XE3, 2010.
    * XE4-XE8 are omitted now, but almost all difference is generated ProductVersion number.
      * Most of codes are developped in 2012(XE3 era. please check "author date" with git log), I've just added 10 Settle .. 11 Alexandria support.
 * Supports Win32/Win64 architecture only.
@@ -22,6 +22,7 @@ Actions added to original prameke4 is below(extracted from `premake4 --help`).
  rs103             Generate Embarcadero RAD Studio 10.3 Rio project files
  rs104             Generate Embarcadero RAD Studio 10.4 Sydney project files
  rs110             Generate Embarcadero RAD Studio 11 Alexandria project files
+ rs120             Generate Embarcadero RAD Studio 12 Athens project files
  rs2010            Generate Embarcadero RAD Studio 2010 project files
  rsxe              Generate Embarcadero RAD Studio XE project files
  rsxe2             Generate Embarcadero RAD Studio XE2 project files
