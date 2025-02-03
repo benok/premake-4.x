@@ -5,7 +5,7 @@
 * Generates groupproj/cbproj for RAD Studio.
 * Supports RAD Studio 10-12, XE-XE3, 2010.
    * XE4-XE8 are omitted now, but almost all difference is generated ProductVersion number.
-     * Most of codes are developped in 2012(XE3 era. please check "author date" with git log), I've just added 10 Settle .. 11 Alexandria support.
+     * Most of codes are developed in 2012(XE3 era. please check "author date" with git log), I've just added 10 Settle .. 11 Alexandria support.
 * Supports Win32/Win64 architecture only.
 * If you choose WindowedApp, generates VCL application cbproj.
 * No vpath, Native support.
@@ -29,7 +29,7 @@ Actions added to original prameke4 is below(extracted from `premake4 --help`).
  rsxe3             Generate Embarcadero RAD Studio XE3 project files
 ```
 
-## Additonal options for RadStudio support
+## Additional options for RadStudio support
 
 ### Bcc_UseNewCompiler flag
 
@@ -42,7 +42,7 @@ configuration { "rs*", "x32" }
 
 ### bcc_disable_warnings
 
-* Works with classic Win32 comipler.
+* Works with classic Win32 compiler.
 * Specify warnings by command line option's id.
 
 ```lua
@@ -56,13 +56,13 @@ configuration { "rs*", "x32" }
     "wpia", -- W8060: Possibly incorrect assignment (-w-pia)
     "wmls", -- W8104: Local Static with constructor dangerous for multi-threaded apps (-w-mls)
     "waus", -- W8004: 'identifier' is assigned a value that is never used (-w-aus)
-  }    
+  }
 ```
 
 ### bcc_clang_options, bcc_clanc_c_options, bcc_clang_cpp_options
 
 * Works with CLANG based compilers.
-* Specify additonal command line options passed to compiler.
+* Specify additional command line options passed to compiler.
   * bcc_clang_c_options (applied to C project only)
   * bcc_clang_cpp_options (applied to C++ project only)
   * bcc_clang_options (applied to both projects)
@@ -70,7 +70,7 @@ configuration { "rs*", "x32" }
   * [Errors and Warnings of Clang\-enhanced C\+\+ Compilers \- RAD Studio](https://docwiki.embarcadero.com/RADStudio/Alexandria/en/Errors_and_Warnings_of_Clang-enhanced_C%2B%2B_Compilers)
 
 ```lua
-configuration { "rs*", "x64" }    
+configuration { "rs*", "x64" }
   bcc_clang_options {
     "-fdiagnostics-show-option",
     "-Wno-deprecated-writable-strings",
